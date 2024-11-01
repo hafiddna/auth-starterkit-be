@@ -5,8 +5,12 @@ import (
 	validator2 "github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	config2 "github.com/hafiddna/auth-starterkit-be/config"
+	"github.com/hafiddna/auth-starterkit-be/controller"
 	"github.com/hafiddna/auth-starterkit-be/database"
 	"github.com/hafiddna/auth-starterkit-be/helper"
+	"github.com/hafiddna/auth-starterkit-be/middleware"
+	"github.com/hafiddna/auth-starterkit-be/repository"
+	"github.com/hafiddna/auth-starterkit-be/service"
 	"github.com/hafiddna/auth-starterkit-be/tool"
 	"github.com/hafiddna/auth-starterkit-be/util"
 	"time"
@@ -38,12 +42,14 @@ var (
 )
 
 func main() {
+	// Timezone
 	utc, err := time.LoadLocation("UTC")
 	if err != nil {
 		panic(err)
 	}
 	time.Local = utc
 
+	// Licensing
 	if err = util.NewLicensing(config).InitApp(); err != nil {
 		panic(err)
 	}
@@ -59,6 +65,63 @@ func main() {
 		panic("Minio connection failed")
 	}
 
-	//setUpRoutes()
+	// Start::Global Middleware
+	app.Use(middleware.CORSMiddleware(config))
+	app.Use(middleware.LoggerMiddleware)
+	// End::Global Middleware
+
+	// Start::Routes
+	setUpGlobalRoutes()
+	setUpPublicRoutes()
+	setUpPrivateRoutes()
+	// End::Routes
+
 	app.Listen(":" + config.App.Server.Port)
+}
+
+var (
+	// Start::Repository
+	assetRepository = repository.NewAssetRepository(gormDB)
+	// End::Repository
+
+	// Start::Service
+	jwtService     = service.NewJWTService(config)
+	storageService = service.NewStorageService(minioClient, assetRepository)
+	// End::Service
+
+	// Start::Controller
+	storageController = controller.NewStorageController(response, validator, storageService, minioClient, jwtService)
+	// End::Controller
+)
+
+func setUpGlobalRoutes() {
+	// Start::Not Found Handler
+	app.Use(func(c *fiber.Ctx) error {
+		return response.SendResponse(helper.ResponseStruct{
+			Ctx:        c,
+			StatusCode: fiber.StatusNotFound,
+			Message:    "Not Found",
+			Error:      "Cannot " + c.Method() + " " + c.Path(),
+		})
+	})
+	// End::Not Found Handler
+}
+
+func setUpPublicRoutes() {
+	public := app.Group("/api")
+
+	// Start:Storage
+	public.Get("/file", storageController.Get)
+	// End:Storage
+}
+
+func setUpPrivateRoutes() {
+	private := app.Group("/api")
+	private.Use(middleware.AuthMiddleware(jwtService, response))
+
+	// Start:Storage
+	storage := private.Group("/file")
+	storage.Post("/", storageController.Upload)
+	storage.Delete("/", storageController.Delete)
+	// End:Storage
 }
