@@ -24,7 +24,7 @@ func DiscordLogger(logTypeParam, titleParam, messageParam, serviceParam string, 
 	service = serviceParam
 	detail = detailParam
 
-	discord, err := discordgo.New("Bot MTE5MTMxMjg5MzMzODIxMDM2NA.GDUke7._bv7huHVeXLviV3flml-gfnRTFwwj2c4RSoIfk")
+	discord, err := discordgo.New("")
 	if err != nil {
 		log.Println("error creating Discord session,", err)
 	}
