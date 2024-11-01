@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
+	"github.com/hafiddna/auth-starterkit-be/config"
 	"log"
 	"os"
 	"os/signal"
@@ -17,14 +18,14 @@ var (
 	color                            int
 )
 
-func DiscordLogger(logTypeParam, titleParam, messageParam, serviceParam string, detailParam map[string]interface{}) {
+func DiscordLogger(config config.CfgStruct, logTypeParam, titleParam, messageParam, serviceParam string, detailParam map[string]interface{}) {
 	logType = logTypeParam
 	title = titleParam
 	message = messageParam
 	service = serviceParam
 	detail = detailParam
 
-	discord, err := discordgo.New("")
+	discord, err := discordgo.New("Bot " + config.App.Discord.Token)
 	if err != nil {
 		log.Println("error creating Discord session,", err)
 	}

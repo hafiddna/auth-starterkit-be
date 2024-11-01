@@ -47,6 +47,9 @@ type CfgStruct struct {
 			PublicKey  string `mapstructure:"public"`
 			PrivateKey string `mapstructure:"private"`
 		} `mapstructure:"jwt"`
+		Discord struct {
+			Token string `mapstructure:"token"`
+		} `mapstructure:"discord"`
 	} `mapstructure:"app"`
 }
 
