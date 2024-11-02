@@ -66,21 +66,21 @@ func (s *storageService) Upload(c *fiber.Ctx, createStorageDto dto.CreateStorage
 	}
 
 	var ownerId string
-	var ownerType string
+	//var ownerType string
 	ownerId, isString := c.Locals("user").(map[string]interface{})["sub"].(string)
 	if !isString {
 		// TODO: Implement owner type for organization/tenant
 		return entity.Asset{}, fiber.NewError(fiber.StatusUnauthorized, "Unauthorized")
 	} else {
-		ownerType = "users"
+		//ownerType = "users"
 	}
 
 	if createStorageDto.Bucket == "private" {
 		createStorageDto.Access = "public"
 	}
 	asset := entity.Asset{
-		OwnerID:      &ownerId,
-		OwnerType:    &ownerType,
+		OwnerID: ownerId,
+		//OwnerType:    &ownerType,
 		Name:         objectName,
 		Type:         fileType,
 		Access:       createStorageDto.Access,

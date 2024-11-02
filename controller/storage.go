@@ -114,7 +114,7 @@ func (p storageController) Get(c *fiber.Ctx) error {
 					})
 				}
 
-				if asset.OwnerID != nil && *asset.OwnerID != userId {
+				if asset.OwnerID != "" && asset.OwnerID != userId {
 					return p.response.SendResponse(helper.ResponseStruct{
 						Ctx:        c,
 						StatusCode: fiber.StatusForbidden,
@@ -286,7 +286,7 @@ func (p storageController) Delete(c *fiber.Ctx) error {
 		})
 	}
 
-	if assetData.OwnerID != nil && *assetData.OwnerID != userId {
+	if assetData.OwnerID != "" && assetData.OwnerID != userId {
 		return p.response.SendResponse(helper.ResponseStruct{
 			Ctx:        c,
 			StatusCode: fiber.StatusForbidden,
