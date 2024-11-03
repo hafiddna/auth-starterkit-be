@@ -5,11 +5,9 @@ import (
 	validator2 "github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	config2 "github.com/hafiddna/auth-starterkit-be/config"
-	"github.com/hafiddna/auth-starterkit-be/controller"
 	"github.com/hafiddna/auth-starterkit-be/database"
 	"github.com/hafiddna/auth-starterkit-be/helper"
 	"github.com/hafiddna/auth-starterkit-be/middleware"
-	"github.com/hafiddna/auth-starterkit-be/repository"
 	"github.com/hafiddna/auth-starterkit-be/service"
 	"github.com/hafiddna/auth-starterkit-be/tool"
 	"github.com/hafiddna/auth-starterkit-be/util"
@@ -81,16 +79,13 @@ func main() {
 
 var (
 	// Start::Repository
-	assetRepository = repository.NewAssetRepository(gormDB)
 	// End::Repository
 
 	// Start::Service
-	jwtService     = service.NewJWTService(config)
-	storageService = service.NewStorageService(minioClient, assetRepository)
+	jwtService = service.NewJWTService(config)
 	// End::Service
 
 	// Start::Controller
-	storageController = controller.NewStorageController(response, validator, storageService, minioClient, jwtService)
 	// End::Controller
 )
 
@@ -108,20 +103,10 @@ func setUpGlobalRoutes() {
 }
 
 func setUpPublicRoutes() {
-	public := app.Group("/api")
-
-	// Start:Storage
-	public.Get("/file", storageController.Get)
-	// End:Storage
+	_ = app.Group("/api")
 }
 
 func setUpPrivateRoutes() {
 	private := app.Group("/api")
 	private.Use(middleware.AuthMiddleware(jwtService, response))
-
-	// Start:Storage
-	storage := private.Group("/file")
-	storage.Post("/", storageController.Upload)
-	storage.Delete("/", storageController.Delete)
-	// End:Storage
 }
