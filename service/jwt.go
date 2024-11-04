@@ -10,14 +10,14 @@ import (
 )
 
 type JWTService interface {
-	GenerateToken(userID, teamId, systemRole string, roles, permissions []string) string
+	GenerateToken(userID, systemRole string, teamIds, roles, permissions []string) string
 	ValidateToken(token string) (*jwt.Token, error)
 }
 
 type jwtCustomClaim struct {
 	jwt.RegisteredClaims
-	TeamSub     string   `json:"team_sub"`
 	Role        string   `json:"role"`
+	TeamSub     []string `json:"team_sub"`
 	Roles       []string `json:"roles"`
 	Permissions []string `json:"permissions"`
 }
@@ -32,7 +32,7 @@ func NewJWTService(config config.CfgStruct) JWTService {
 	}
 }
 
-func (j *jwtService) GenerateToken(userID, teamId, systemRole string, roles, permissions []string) string {
+func (j *jwtService) GenerateToken(userID, systemRole string, teamIds, roles, permissions []string) string {
 	uuid := uuid2.New()
 
 	claims := &jwtCustomClaim{
@@ -44,7 +44,7 @@ func (j *jwtService) GenerateToken(userID, teamId, systemRole string, roles, per
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			ID:        uuid.String(),
 		},
-		TeamSub:     teamId,
+		TeamSub:     teamIds,
 		Role:        systemRole,
 		Roles:       roles,
 		Permissions: permissions,

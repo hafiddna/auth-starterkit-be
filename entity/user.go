@@ -20,7 +20,7 @@ type User struct {
 	Role                   string     `gorm:"type:varchar(255)" json:"role"`
 	RememberToken          *string    `gorm:"nullable;select:false" json:"remember_token"`
 	Assets                 []Asset    `gorm:"foreignKey:OwnerID" json:"assets,omitempty"`
-	//Roles                  []Role         `gorm:"many2many:role_user" json:"roles"`
+	Roles                  []Role     `gorm:"many2many:role_user" json:"roles"`
 	//Sessions               []Session      `gorm:"foreignKey:UserID" json:"sessions"`
 	Metadata datatypes.JSON `gorm:"type:jsonb" json:"metadata"`
 }

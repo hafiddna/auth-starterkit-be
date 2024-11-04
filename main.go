@@ -5,9 +5,11 @@ import (
 	validator2 "github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	config2 "github.com/hafiddna/auth-starterkit-be/config"
+	"github.com/hafiddna/auth-starterkit-be/controller"
 	"github.com/hafiddna/auth-starterkit-be/database"
 	"github.com/hafiddna/auth-starterkit-be/helper"
 	"github.com/hafiddna/auth-starterkit-be/middleware"
+	"github.com/hafiddna/auth-starterkit-be/repository"
 	"github.com/hafiddna/auth-starterkit-be/service"
 	"github.com/hafiddna/auth-starterkit-be/tool"
 	"github.com/hafiddna/auth-starterkit-be/util"
@@ -79,13 +81,21 @@ func main() {
 
 var (
 	// Start::Repository
+	roleUserRepository    = repository.NewRoleUserRepository(gormDB)
+	sessionRepository     = repository.NewSessionRepository(gormDB)
+	userProfileRepository = repository.NewUserProfileRepository(mongoDB)
+	userRepository        = repository.NewUserRepository(gormDB)
 	// End::Repository
 
 	// Start::Service
-	jwtService = service.NewJWTService(config)
+	authService    = service.NewAuthService(userService, jwtService)
+	jwtService     = service.NewJWTService(config)
+	sessionService = service.NewSessionService(sessionRepository)
+	userService    = service.NewUserService(userRepository, userProfileRepository, roleUserRepository)
 	// End::Service
 
 	// Start::Controller
+	authController = controller.NewAuthController(response, validator, authService, sessionService)
 	// End::Controller
 )
 
@@ -103,10 +113,22 @@ func setUpGlobalRoutes() {
 }
 
 func setUpPublicRoutes() {
-	_ = app.Group("/api")
+	public := app.Group("/api")
+
+	// Start:Auth
+	public.Post("/login", authController.Login)
+	public.Post("/refresh-token", authController.Refresh)
+	// End:Auth
 }
 
 func setUpPrivateRoutes() {
 	private := app.Group("/api")
 	private.Use(middleware.AuthMiddleware(jwtService, response))
+
+	// Start:Auth
+	private.Get("/profile", authController.GetProfile)
+	private.Post("/logout", authController.Logout)
+	//private.Patch("/users/:id/account-activation", userController.AccountActivation)
+	//private.Patch("/users/:id/assign-roles", userController.AssignRoles)
+	// End:Auth
 }
