@@ -78,9 +78,8 @@ func (a *authController) Login(c *fiber.Ctx) error {
 	userAgent := c.Get("User-Agent")
 	go a.sessionService.Create(entity.Session{
 		UserID:       user.(entity.User).ID,
-		User:         entity.User{},
 		IPAddress:    c.IP(),
-		UserAgent:    &userAgent,
+		UserAgent:    userAgent,
 		Payload:      "",
 		LastActivity: time.Now().Unix(),
 	})

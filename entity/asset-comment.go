@@ -14,3 +14,7 @@ type AssetComment struct {
 	Comment    string          `gorm:"type:text" json:"comment"`
 	IsResolved bool            `gorm:"type:boolean;default:false" json:"is_resolved"`
 }
+
+func (a *AssetComment) TableName() string {
+	return "asset_comment"
+}

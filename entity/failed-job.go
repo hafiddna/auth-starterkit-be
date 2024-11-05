@@ -1,1 +1,13 @@
 package entity
+
+import "github.com/hafiddna/auth-starterkit-be/entity/global"
+
+type FailedJob struct {
+	global.Model
+	UUID       string `gorm:"type:uuid;unique" json:"uuid"`
+	Connection string `gorm:"type:text" json:"connection"`
+	Queue      string `gorm:"type:text" json:"queue"`
+	Payload    string `gorm:"type:text" json:"payload"`
+	Exception  string `gorm:"type:text" json:"exception"`
+	FailedAt   string `gorm:"type:timestamp" json:"failed_at"`
+}

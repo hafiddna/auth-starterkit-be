@@ -10,11 +10,10 @@ type UserProfile struct {
 	FullName string             `json:"full_name" bson:"full_name"`
 	NickName string             `json:"nick_name" bson:"nick_name"`
 	UserID   string             `json:"user_id" bson:"user_id"`
+	User     *User              `json:"user" bson:"-"`
 	AvatarID string             `json:"avatar_id" bson:"avatar_id"`
-	Avatar   *Asset             `json:"avatar" bson:"avatar"`
+	Avatar   *Asset             `json:"avatar" bson:"-"`
 	Metadata global.EmbedJSON   `json:"metadata" bson:"metadata"`
-
-	//ProfileImage        string `json:"ProfileImage,omitempty" bson:"ProfileImage,omitempty"`
 
 	//ClientID            string `json:"ClientID,omitempty" bson:"ClientID,omitempty"`
 	//MemberID            string `json:"MemberID,omitempty" bson:"MemberID,omitempty"`
