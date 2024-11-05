@@ -6,12 +6,13 @@ import (
 )
 
 type UserProfile struct {
-	ID       primitive.ObjectID `json:"id" bson:"_id,omitempty"`
+	ID       primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
 	FullName string             `json:"full_name" bson:"full_name"`
 	NickName string             `json:"nick_name" bson:"nick_name"`
 	UserID   string             `json:"user_id" bson:"user_id"`
-	AvatarID *string            `json:"avatar_id" bson:"avatar_id"`
-	Metadata global.EmbedJSON   `json:"metadata,omitempty" bson:"metadata,omitempty"`
+	AvatarID string             `json:"avatar_id" bson:"avatar_id"`
+	Avatar   *Asset             `json:"avatar" bson:"avatar"`
+	Metadata global.EmbedJSON   `json:"metadata" bson:"metadata"`
 
 	//ProfileImage        string `json:"ProfileImage,omitempty" bson:"ProfileImage,omitempty"`
 

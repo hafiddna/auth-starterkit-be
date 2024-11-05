@@ -6,6 +6,6 @@ import (
 )
 
 type UserSetting struct {
-	ID       primitive.ObjectID `json:"id" bson:"_id,omitempty"`
-	Metadata global.EmbedJSON   `json:"metadata,omitempty" bson:"metadata,omitempty"`
+	ID       primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
+	Metadata global.EmbedJSON   `json:"metadata" bson:"metadata"`
 }
