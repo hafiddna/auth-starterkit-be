@@ -14,17 +14,17 @@ type EmbedJSON struct {
 	DeletedBy string `json:"deleted_by" bson:"deleted_by"`
 }
 
-func (d *EmbedJSON) SetCreated(createdBy string) {
+func (d *EmbedJSON) Created(createdBy string) {
 	d.CreatedBy = createdBy
-	d.CreatedAt = time.Now().UnixMilli()
+	d.CreatedAt = time.Now().UnixNano() / int64(time.Millisecond)
 }
 
-func (d *EmbedJSON) SetUpdated(updatedBy string) {
+func (d *EmbedJSON) Updated(updatedBy string) {
 	d.UpdatedBy = updatedBy
-	d.UpdatedAt = time.Now().UnixMilli()
+	d.UpdatedAt = time.Now().UnixNano() / int64(time.Millisecond)
 }
 
-func (d *EmbedJSON) SetDeleted(deletedBy string) {
+func (d *EmbedJSON) SoftDelete(deletedBy string) {
 	d.DeletedBy = deletedBy
-	d.DeletedAt = time.Now().UnixMilli()
+	d.DeletedAt = time.Now().UnixNano() / int64(time.Millisecond)
 }
