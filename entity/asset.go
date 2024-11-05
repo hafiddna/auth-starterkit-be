@@ -1,19 +1,22 @@
 package entity
 
-import "gorm.io/datatypes"
+import (
+	"github.com/hafiddna/auth-starterkit-be/entity/global"
+	"gorm.io/datatypes"
+)
 
 type Asset struct {
-	ID string `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()" json:"id,omitempty"`
-	//OwnerID *string `gorm:"type:uuid" json:"owner_id"`
-	//OwnerType    *string        `gorm:"type:varchar(255)" json:"owner_type"`
-	OwnerID      string         `gorm:"type:uuid;index" json:"owner_id_id"`
-	Owner        User           `gorm:"foreignKey:OwnerID" json:"owner"`
+	global.Model
+	OwnerID      string         `gorm:"type:uuid" json:"owner_id"`
+	Owner        *User          `gorm:"foreignKey:OwnerID" json:"owner"`
+	FolderID     string         `gorm:"type:uuid" json:"folder_id"`
+	Folder       *Folder        `gorm:"foreignKey:FolderID" json:"folder"`
 	Name         string         `gorm:"type:varchar(255)" json:"name"`
-	Type         string         `gorm:"type:enum('image', 'video', 'pdf', 'file');not null" json:"type"`
-	Access       string         `gorm:"type:enum('public', 'private');default:'private'" json:"access"`
-	BucketType   string         `gorm:"type:enum('public', 'private');default:'private'" json:"bucket_type"`
 	Path         string         `gorm:"type:varchar(255)" json:"path"`
-	Bytes        float64        `gorm:"type:decimal(20,0);default:0" json:"bytes"`
-	FileMetadata datatypes.JSON `gorm:"type:jsonb;null" json:"file_metadata,omitempty"`
-	Metadata     datatypes.JSON `gorm:"type:jsonb;-" json:"metadata,omitempty"`
+	Size         int64          `gorm:"type:bigint;default:0" json:"size"`
+	Type         string         `gorm:"type:varchar(255);default:'file';comment:'document, spreadsheet, presentation, form, image, pdf, video, shortcut, site, audio, drawing, archive, file'" json:"type"`
+	Access       string         `gorm:"type:enum('public', 'private');default:'private'" json:"access"`
+	BucketName   string         `gorm:"type:varchar(255)" json:"bucket_name"`
+	IsPublic     bool           `gorm:"type:boolean;default:false" json:"is_public"`
+	FileMetadata datatypes.JSON `gorm:"type:jsonb;null" json:"file_metadata"`
 }

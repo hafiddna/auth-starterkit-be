@@ -1,6 +1,9 @@
 package entity
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"github.com/hafiddna/auth-starterkit-be/entity/global"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type UserProfile struct {
 	ID       primitive.ObjectID `json:"id" bson:"_id,omitempty"`
@@ -8,7 +11,7 @@ type UserProfile struct {
 	NickName string             `json:"nick_name" bson:"nick_name"`
 	UserID   string             `json:"user_id" bson:"user_id"`
 	AvatarID *string            `json:"avatar_id" bson:"avatar_id"`
-	Metadata EmbedJSON          `json:"metadata,omitempty" bson:"metadata,omitempty"`
+	Metadata global.EmbedJSON   `json:"metadata,omitempty" bson:"metadata,omitempty"`
 
 	//ProfileImage        string `json:"ProfileImage,omitempty" bson:"ProfileImage,omitempty"`
 
