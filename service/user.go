@@ -13,13 +13,15 @@ type UserService interface {
 type userService struct {
 	userRepository repository.UserRepository
 	userProfile    repository.UserProfileRepository
+	userSetting    repository.UserSettingRepository
 	roleUser       repository.RoleUserRepository
 }
 
-func NewUserService(userRepository repository.UserRepository, userProfile repository.UserProfileRepository, roleUser repository.RoleUserRepository) UserService {
+func NewUserService(userRepository repository.UserRepository, userProfile repository.UserProfileRepository, userSetting repository.UserSettingRepository, roleUser repository.RoleUserRepository) UserService {
 	return &userService{
 		userRepository: userRepository,
 		userProfile:    userProfile,
+		userSetting:    userSetting,
 		roleUser:       roleUser,
 	}
 }

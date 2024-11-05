@@ -85,13 +85,14 @@ var (
 	sessionRepository     = repository.NewSessionRepository(gormDB)
 	userProfileRepository = repository.NewUserProfileRepository(mongoDB)
 	userRepository        = repository.NewUserRepository(gormDB)
+	userSettingRepository = repository.NewUserSettingRepository(mongoDB)
 	// End::Repository
 
 	// Start::Service
 	authService    = service.NewAuthService(userService, jwtService)
 	jwtService     = service.NewJWTService(config)
 	sessionService = service.NewSessionService(sessionRepository)
-	userService    = service.NewUserService(userRepository, userProfileRepository, roleUserRepository)
+	userService    = service.NewUserService(userRepository, userProfileRepository, userSettingRepository, roleUserRepository)
 	// End::Service
 
 	// Start::Controller
