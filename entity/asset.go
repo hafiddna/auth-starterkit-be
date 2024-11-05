@@ -8,9 +8,9 @@ import (
 type Asset struct {
 	global.Model
 	OwnerID      string         `gorm:"type:uuid" json:"owner_id"`
-	Owner        *User          `gorm:"foreignKey:OwnerID" json:"owner"`
-	FolderID     string         `gorm:"type:uuid" json:"folder_id"`
-	Folder       *Folder        `gorm:"foreignKey:FolderID" json:"folder"`
+	Owner        *User          `gorm:"foreignKey:OwnerID" json:"owner,omitempty"`
+	FolderID     string         `gorm:"type:uuid" json:"folder_id,omitempty"`
+	Folder       *Folder        `gorm:"foreignKey:FolderID" json:"folder,omitempty"`
 	Name         string         `gorm:"type:varchar(255)" json:"name"`
 	Path         string         `gorm:"type:varchar(255)" json:"path"`
 	Size         int64          `gorm:"type:bigint;default:0" json:"size"`
