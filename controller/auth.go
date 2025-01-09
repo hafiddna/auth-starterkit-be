@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"database/sql"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/hafiddna/auth-starterkit-be/dto"
@@ -79,9 +80,18 @@ func (a *authController) Login(c *fiber.Ctx) error {
 	userId := user.(entity.User).ID
 	ipAddress := c.IP()
 	go a.sessionService.Create(entity.Session{
-		UserID:       &userId,
-		IPAddress:    &ipAddress,
-		UserAgent:    &userAgent,
+		UserID: sql.NullString{
+			String: userId,
+			Valid:  true,
+		},
+		IPAddress: sql.NullString{
+			String: ipAddress,
+			Valid:  true,
+		},
+		UserAgent: sql.NullString{
+			String: userAgent,
+			Valid:  true,
+		},
 		Payload:      "",
 		LastActivity: time.Now().Unix(),
 	})
