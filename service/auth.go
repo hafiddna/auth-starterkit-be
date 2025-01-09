@@ -51,7 +51,8 @@ func (a *authService) Login(user entity.User) interface{} {
 	}
 
 	// TODO:
-	return a.jwtService.GenerateToken(user.ID, user.Role, []string{}, roles, permissions)
+	//return a.jwtService.GenerateToken(user.ID, user.Role, []string{}, roles, permissions)
+	return a.jwtService.GenerateToken(user.ID, "", []string{}, roles, permissions)
 }
 
 func (a *authService) Profile(id string) interface{} {

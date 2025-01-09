@@ -6,6 +6,7 @@ import (
 	"github.com/hafiddna/auth-starterkit-be/config"
 )
 
+// TODO: Recheck this middleware
 func CORSMiddleware(config config.CfgStruct) fiber.Handler {
 	return cors.New(
 		cors.Config{

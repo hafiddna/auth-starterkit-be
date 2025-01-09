@@ -55,9 +55,15 @@ func main() {
 	}
 
 	// MongoDB
+	if mongoErr != nil {
+		panic(mongoErr)
+	}
 	defer database.NewMongoDB(config, ctx).Disconnect(mongoClient)
 
 	// PostgreSQL
+	if postgreErr != nil {
+		panic(postgreErr)
+	}
 	defer database.NewPostgreSQL(config).Disconnect(sqlDB)
 
 	// Minio
@@ -71,9 +77,9 @@ func main() {
 	// End::Global Middleware
 
 	// Start::Routes
-	setUpGlobalRoutes()
 	setUpPublicRoutes()
 	setUpPrivateRoutes()
+	setUpGlobalRoutes()
 	// End::Routes
 
 	app.Listen(":" + config.App.Server.Port)
