@@ -18,5 +18,6 @@ func NewSessionRepository(db *gorm.DB) SessionRepository {
 }
 
 func (r *sessionRepository) Create(session entity.Session) interface{} {
-	return r.db.Create(&session).Error
+	session.Created("system")
+	return r.db.Table("sessions").Create(&session).Error
 }

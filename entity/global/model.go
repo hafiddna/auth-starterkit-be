@@ -2,6 +2,8 @@ package global
 
 import (
 	"gorm.io/datatypes"
+	"strconv"
+	"time"
 )
 
 type Model struct {
@@ -10,13 +12,16 @@ type Model struct {
 }
 
 func (m *Model) Created(userID string) {
-	// set metadata created_by, created_at, updated_by, updated_at
+	timestamp := time.Now().UnixNano() / int64(time.Millisecond)
+	m.Metadata = []byte(`{"created_by": "` + userID + `", "created_at": ` + strconv.FormatInt(timestamp, 10) + `, "updated_by": "` + userID + `", "updated_at": ` + strconv.FormatInt(timestamp, 10) + `}`)
 }
 
 func (m *Model) Updated(userID string) {
-	// set metadata updated_by, updated_at
+	// TODO: Implement Updated method
+	//timestamp := time.Now().UnixNano() / int64(time.Millisecond)
 }
 
 func (m *Model) SoftDelete(userID string) {
-	// set metadata deleted_by, deleted_at
+	// TODO: Implement SoftDelete method
+	//timestamp := time.Now().UnixNano() / int64(time.Millisecond)
 }
