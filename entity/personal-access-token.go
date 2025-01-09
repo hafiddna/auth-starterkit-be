@@ -9,7 +9,11 @@ type PersonalAccessToken struct {
 	Tokenable     interface{} `gorm:"-" json:"tokenable"`
 	Name          string      `gorm:"not null;type:varchar(255)" json:"name"`
 	Token         string      `gorm:"not null;type:varchar(64);unique" json:"token"`
-	Abilities     string      `gorm:"type:text;nullable" json:"abilities"`
-	LastUsedAt    int64       `gorm:"type:integer;nullable" json:"last_used_at"`
-	ExpiresAt     int64       `gorm:"type:integer;nullable" json:"expires_at"`
+	Abilities     *string     `gorm:"type:text;nullable" json:"abilities"`
+	LastUsedAt    *int64      `gorm:"type:integer;nullable" json:"last_used_at"`
+	ExpiresAt     *int64      `gorm:"type:integer;nullable" json:"expires_at"`
+}
+
+func (PersonalAccessToken) TableName() string {
+	return "personal_access_tokens"
 }

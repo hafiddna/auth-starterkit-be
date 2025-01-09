@@ -11,3 +11,7 @@ type FailedJob struct {
 	Exception  string `gorm:"type:text" json:"exception"`
 	FailedAt   string `gorm:"type:timestamp" json:"failed_at"`
 }
+
+func (FailedJob) TableName() string {
+	return "failed_jobs"
+}

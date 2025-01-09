@@ -10,3 +10,7 @@ type Translation struct {
 	Language       *Language `gorm:"foreignKey:LanguageLocale;references:Locale" json:"language"`
 	Value          string    `gorm:"type:text;not null" json:"value"`
 }
+
+func (Translation) TableName() string {
+	return "translations"
+}

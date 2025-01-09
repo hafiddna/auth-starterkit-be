@@ -9,6 +9,6 @@ type Cache struct {
 	Expiration int64  `gorm:"type:bigint" json:"expiration"`
 }
 
-func (c *Cache) TableName() string {
+func (Cache) TableName() string {
 	return "cache"
 }

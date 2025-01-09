@@ -76,10 +76,12 @@ func (a *authController) Login(c *fiber.Ctx) error {
 	}
 
 	userAgent := c.Get("User-Agent")
+	userId := user.(entity.User).ID
+	ipAddress := c.IP()
 	go a.sessionService.Create(entity.Session{
-		UserID:       user.(entity.User).ID,
-		IPAddress:    c.IP(),
-		UserAgent:    userAgent,
+		UserID:       &userId,
+		IPAddress:    &ipAddress,
+		UserAgent:    &userAgent,
 		Payload:      "",
 		LastActivity: time.Now().Unix(),
 	})

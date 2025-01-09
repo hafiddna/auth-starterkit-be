@@ -9,3 +9,7 @@ type UserRole struct {
 	RoleID string `gorm:"type:uuid;not null" json:"role_id"`
 	Role   *Role  `gorm:"foreignKey:RoleID" json:"role"`
 }
+
+func (UserRole) TableName() string {
+	return "user_role"
+}

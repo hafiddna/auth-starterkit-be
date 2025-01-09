@@ -10,6 +10,6 @@ type RolePermission struct {
 	Role         *Role       `gorm:"foreignKey:RoleID" json:"role"`
 }
 
-func (r *RolePermission) TableName() string {
+func (RolePermission) TableName() string {
 	return "role_permission"
 }

@@ -9,3 +9,7 @@ type TeamUser struct {
 	UserID string `gorm:"type:uuid;not null" json:"user_id"`
 	User   *User  `gorm:"foreignKey:UserID" json:"user"`
 }
+
+func (TeamUser) TableName() string {
+	return "team_user"
+}

@@ -5,6 +5,6 @@ type I18n struct {
 	Translations []*Translation `gorm:"foreignKey:I18nID" json:"translations"`
 }
 
-func (i *I18n) TableName() string {
+func (I18n) TableName() string {
 	return "i18ns"
 }

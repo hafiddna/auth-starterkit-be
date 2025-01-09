@@ -7,11 +7,11 @@ import (
 
 type UserProfile struct {
 	ID       primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
-	FullName string             `json:"full_name" bson:"full_name"`
-	NickName string             `json:"nick_name" bson:"nick_name"`
+	FullName *string            `json:"full_name" bson:"full_name"`
+	NickName *string            `json:"nick_name" bson:"nick_name"`
 	UserID   string             `json:"user_id" bson:"user_id"`
 	User     *User              `json:"user" bson:"-"`
-	AvatarID string             `json:"avatar_id" bson:"avatar_id"`
+	AvatarID *string            `json:"avatar_id" bson:"avatar_id"`
 	Avatar   *Asset             `json:"avatar" bson:"-"`
 	Metadata global.EmbedJSON   `json:"metadata" bson:"metadata"`
 

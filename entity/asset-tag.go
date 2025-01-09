@@ -10,6 +10,6 @@ type AssetTag struct {
 	Tag     *Tag   `gorm:"foreignKey:TagID" json:"tag"`
 }
 
-func (a *AssetTag) TableName() string {
+func (AssetTag) TableName() string {
 	return "asset_tag"
 }

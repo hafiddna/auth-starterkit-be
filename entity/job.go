@@ -7,6 +7,10 @@ type Job struct {
 	Queue       string `gorm:"type:varchar(255);index" json:"queue"`
 	Payload     string `gorm:"type:text" json:"payload"`
 	Attempts    int    `gorm:"type:integer" json:"attempts"`
-	ReservedAt  int64  `gorm:"type:integer" json:"reserved_at"`
+	ReservedAt  *int64 `gorm:"type:integer" json:"reserved_at"`
 	AvailableAt int64  `gorm:"type:integer" json:"available_at"`
+}
+
+func (Job) TableName() string {
+	return "jobs"
 }

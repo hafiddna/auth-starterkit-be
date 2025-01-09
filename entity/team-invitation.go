@@ -13,3 +13,7 @@ type TeamInvitation struct {
 	RoleID    string `gorm:"type:uuid;not null" json:"role_id"`
 	Role      *Role  `gorm:"foreignKey:RoleID" json:"role"`
 }
+
+func (TeamInvitation) TableName() string {
+	return "team_invitations"
+}

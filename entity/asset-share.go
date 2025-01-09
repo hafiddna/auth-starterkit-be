@@ -11,6 +11,6 @@ type AssetShare struct {
 	Access  string `gorm:"type:varchar(255);default:'viewer';comment:'viewer, editor, commenter'" json:"access"`
 }
 
-func (a *AssetShare) TableName() string {
+func (AssetShare) TableName() string {
 	return "asset_share"
 }
