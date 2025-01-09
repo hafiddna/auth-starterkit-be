@@ -77,9 +77,7 @@ func main() {
 	// End::Global Middleware
 
 	// Start::Routes
-	setUpPublicRoutes()
-	setUpPrivateRoutes()
-	setUpGlobalRoutes()
+	setUpRoutes()
 	// End::Routes
 
 	app.Listen(":" + config.App.Server.Port)
@@ -106,7 +104,28 @@ var (
 	// End::Controller
 )
 
-func setUpGlobalRoutes() {
+func setUpRoutes() {
+	// Start::Public Routes
+	public := app.Group("/api")
+
+	// Start:Auth
+	public.Post("/login", authController.Login)
+	public.Post("/refresh-token", authController.Refresh)
+	// End:Auth
+	// End::Public Routes
+
+	// Start::Private Routes
+	private := app.Group("/api")
+	private.Use(middleware.AuthMiddleware(jwtService, response))
+
+	// Start:Auth
+	private.Get("/profile", authController.GetProfile)
+	private.Post("/logout", authController.Logout)
+	//private.Patch("/users/:id/account-activation", userController.AccountActivation)
+	//private.Patch("/users/:id/assign-roles", userController.AssignRoles)
+	// End:Auth
+	// End::Private Routes
+
 	// Start::Not Found Handler
 	app.Use(func(c *fiber.Ctx) error {
 		return response.SendResponse(helper.ResponseStruct{
@@ -117,25 +136,4 @@ func setUpGlobalRoutes() {
 		})
 	})
 	// End::Not Found Handler
-}
-
-func setUpPublicRoutes() {
-	public := app.Group("/api")
-
-	// Start:Auth
-	public.Post("/login", authController.Login)
-	public.Post("/refresh-token", authController.Refresh)
-	// End:Auth
-}
-
-func setUpPrivateRoutes() {
-	private := app.Group("/api")
-	private.Use(middleware.AuthMiddleware(jwtService, response))
-
-	// Start:Auth
-	private.Get("/profile", authController.GetProfile)
-	private.Post("/logout", authController.Logout)
-	//private.Patch("/users/:id/account-activation", userController.AccountActivation)
-	//private.Patch("/users/:id/assign-roles", userController.AssignRoles)
-	// End:Auth
 }
