@@ -67,6 +67,12 @@ func (a *authController) Login(c *fiber.Ctx) error {
 		})
 	}
 
+	return a.response.SendResponse(helper.ResponseStruct{
+		Ctx:        c,
+		StatusCode: fiber.StatusUnauthorized,
+		Message:    "Unauthorized",
+	})
+
 	accessToken := a.authService.Login(user.(entity.User))
 	if accessToken == nil {
 		return a.response.SendResponse(helper.ResponseStruct{
