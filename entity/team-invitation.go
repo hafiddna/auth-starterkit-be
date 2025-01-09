@@ -14,6 +14,6 @@ type TeamInvitation struct {
 	Role      *Role  `gorm:"foreignKey:RoleID" json:"role"`
 }
 
-func (TeamInvitation) TableName() string {
+func (t *TeamInvitation) TableName() string {
 	return "team_invitations"
 }

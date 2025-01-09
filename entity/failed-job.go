@@ -12,6 +12,6 @@ type FailedJob struct {
 	FailedAt   string `gorm:"type:timestamp" json:"failed_at"`
 }
 
-func (FailedJob) TableName() string {
+func (f *FailedJob) TableName() string {
 	return "failed_jobs"
 }

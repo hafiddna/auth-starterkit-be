@@ -9,6 +9,6 @@ type CacheLock struct {
 	Expiration int64  `gorm:"type:bigint" json:"expiration"`
 }
 
-func (CacheLock) TableName() string {
+func (c *CacheLock) TableName() string {
 	return "cache_locks"
 }

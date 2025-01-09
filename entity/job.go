@@ -14,6 +14,6 @@ type Job struct {
 	AvailableAt int64         `gorm:"type:integer" json:"available_at"`
 }
 
-func (Job) TableName() string {
+func (j *Job) TableName() string {
 	return "jobs"
 }

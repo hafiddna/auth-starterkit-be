@@ -15,6 +15,6 @@ type Session struct {
 	LastActivity int64          `gorm:"type:integer;index" json:"last_activity"`
 }
 
-func (Session) TableName() string {
+func (s *Session) TableName() string {
 	return "sessions"
 }

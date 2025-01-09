@@ -17,6 +17,6 @@ type PersonalAccessToken struct {
 	ExpiresAt     sql.NullInt64  `gorm:"type:integer;nullable" json:"expires_at"`
 }
 
-func (PersonalAccessToken) TableName() string {
+func (p *PersonalAccessToken) TableName() string {
 	return "personal_access_tokens"
 }

@@ -12,10 +12,10 @@ type Role struct {
 	Name            string            `gorm:"uniqueIndex:roles_name_unique" json:"name"`
 	Description     sql.NullString    `gorm:"nullable" json:"description"`
 	TeamInvitations []*TeamInvitation `gorm:"foreignKey:RoleID" json:"team_invitations,omitempty"`
-	Users           []*User           `gorm:"many2many:user_role" json:"users,omitempty"`
+	Users           []User            `gorm:"many2many:user_role;joinForeignKey:RoleID;joinReferences:UserID" json:"users,omitempty"`
 	Permissions     []*Permission     `gorm:"many2many:role_permission" json:"permissions,omitempty"`
 }
 
-func (Role) TableName() string {
+func (r *Role) TableName() string {
 	return "roles"
 }

@@ -17,6 +17,6 @@ type Folder struct {
 	Name      string         `gorm:"type:varchar(255)" json:"name"`
 }
 
-func (Folder) TableName() string {
+func (f *Folder) TableName() string {
 	return "folders"
 }

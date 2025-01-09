@@ -8,9 +8,9 @@ import (
 type AssetComment struct {
 	global.Model
 	AssetID    string          `gorm:"type:uuid;index" json:"asset_id"`
-	Asset      *Asset          `gorm:"foreignKey:AssetID" json:"asset"`
+	Asset      Asset           `gorm:"foreignKey:AssetID" json:"asset"`
 	UserID     string          `gorm:"type:uuid;index" json:"user_id"`
-	User       *User           `gorm:"foreignKey:UserID" json:"user"`
+	User       User            `gorm:"foreignKey:UserID" json:"user"`
 	ParentID   sql.NullString  `gorm:"type:uuid" json:"parent_id"`
 	Parent     *AssetComment   `gorm:"foreignKey:ParentID" json:"parent"`
 	Children   []*AssetComment `gorm:"foreignKey:ParentID" json:"children"`
@@ -18,6 +18,6 @@ type AssetComment struct {
 	IsResolved bool            `gorm:"type:boolean;default:false" json:"is_resolved"`
 }
 
-func (AssetComment) TableName() string {
+func (a *AssetComment) TableName() string {
 	return "asset_comment"
 }

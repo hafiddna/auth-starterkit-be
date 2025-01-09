@@ -12,6 +12,6 @@ type Permission struct {
 	Roles       []*Role        `gorm:"many2many:role_permission" json:"roles,omitempty"`
 }
 
-func (Permission) TableName() string {
+func (p *Permission) TableName() string {
 	return "permissions"
 }

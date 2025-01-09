@@ -13,6 +13,6 @@ type PasswordResetToken struct {
 	ExpiresAt int64  `gorm:"type:integer;not null" json:"expires_at"`
 }
 
-func (PasswordResetToken) TableName() string {
+func (p *PasswordResetToken) TableName() string {
 	return "password_reset_tokens"
 }

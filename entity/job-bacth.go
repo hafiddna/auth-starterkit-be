@@ -17,6 +17,6 @@ type JobBatch struct {
 	FinishedAt   sql.NullInt64  `gorm:"type:integer" json:"finished_at"`
 }
 
-func (JobBatch) TableName() string {
+func (j *JobBatch) TableName() string {
 	return "job_batches"
 }

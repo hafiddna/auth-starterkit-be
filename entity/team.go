@@ -18,6 +18,6 @@ type Team struct {
 	PersonalTeam bool              `gorm:"type:boolean;default:false" json:"personal_team"`
 }
 
-func (Team) TableName() string {
+func (t *Team) TableName() string {
 	return "teams"
 }

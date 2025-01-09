@@ -5,11 +5,11 @@ import "github.com/hafiddna/auth-starterkit-be/entity/global"
 type AssetTag struct {
 	global.Model
 	AssetID string `gorm:"type:uuid;index" json:"asset_id"`
-	Asset   *Asset `gorm:"foreignKey:AssetID" json:"asset"`
+	Asset   Asset  `gorm:"foreignKey:AssetID" json:"asset"`
 	TagID   string `gorm:"type:uuid;index" json:"tag_id"`
-	Tag     *Tag   `gorm:"foreignKey:TagID" json:"tag"`
+	Tag     Tag    `gorm:"foreignKey:TagID" json:"tag"`
 }
 
-func (AssetTag) TableName() string {
+func (a *AssetTag) TableName() string {
 	return "asset_tag"
 }

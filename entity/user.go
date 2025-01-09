@@ -22,15 +22,15 @@ type User struct {
 	Teams                  []*Team               `gorm:"foreignKey:OwnerID" json:"teams"`
 	Profile                *UserProfile          `gorm:"-" json:"profile"`
 	Setting                *UserSetting          `gorm:"-" json:"setting"`
-	Roles                  []*Role               `gorm:"many2many:user_role" json:"roles"`
+	Roles                  []Role                `gorm:"many2many:user_role;joinForeignKey:UserID;joinReferences:RoleID" json:"roles"`
 	PasswordResetTokens    []*PasswordResetToken `gorm:"foreignKey:UserID" json:"password_reset_tokens"`
 	Sessions               []*Session            `gorm:"foreignKey:UserID" json:"sessions"`
-	AssetShares            []*AssetShare         `gorm:"many2many:asset_share" json:"asset_shares"`
+	AssetShares            []AssetShare          `gorm:"many2many:asset_share" json:"asset_shares"`
 	AssetComments          []*AssetComment       `gorm:"many2many:asset_comment" json:"asset_comments"`
 	Folders                []*Folder             `gorm:"polymorphicType:OwnerType;polymorphicId:OwnerID;polymorphicValue:users" json:"folders"`
 	Assets                 []*Asset              `gorm:"polymorphicType:OwnerType;polymorphicId:OwnerID;polymorphicValue:users" json:"assets"`
 }
 
-func (User) TableName() string {
+func (u *User) TableName() string {
 	return "users"
 }

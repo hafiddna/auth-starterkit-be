@@ -22,12 +22,12 @@ type Asset struct {
 	IsPublic     bool            `gorm:"type:boolean;default:false" json:"is_public"`
 	FileMetadata *datatypes.JSON `gorm:"type:jsonb;null" json:"file_metadata"`
 	UserProfiles []*UserProfile  `gorm:"foreignKey:AvatarID" json:"user_profiles,omitempty"`
-	Languages    []*Language     `gorm:"foreignKey:IconID" json:"languages,omitempty"`
-	Shares       []*AssetShare   `gorm:"many2many:asset_share" json:"shares,omitempty"`
+	Languages    []Language      `gorm:"foreignKey:IconID" json:"languages,omitempty"`
+	Shares       []AssetShare    `gorm:"many2many:asset_share" json:"shares,omitempty"`
 	Comments     []*AssetComment `gorm:"many2many:asset_comment" json:"comments,omitempty"`
-	Tags         []*Tag          `gorm:"many2many:asset_tag" json:"tags,omitempty"`
+	Tags         []Tag           `gorm:"many2many:asset_tag" json:"tags,omitempty"`
 }
 
-func (Asset) TableName() string {
+func (a *Asset) TableName() string {
 	return "assets"
 }
