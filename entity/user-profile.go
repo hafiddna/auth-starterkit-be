@@ -1,17 +1,18 @@
 package entity
 
 import (
+	"database/sql"
 	"github.com/hafiddna/auth-starterkit-be/entity/global"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type UserProfile struct {
 	ID       primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
-	FullName *string            `json:"full_name" bson:"full_name"`
-	NickName *string            `json:"nick_name" bson:"nick_name"`
+	FullName sql.NullString     `json:"full_name" bson:"full_name"`
+	NickName sql.NullString     `json:"nick_name" bson:"nick_name"`
 	UserID   string             `json:"user_id" bson:"user_id"`
 	User     *User              `json:"user" bson:"-"`
-	AvatarID *string            `json:"avatar_id" bson:"avatar_id"`
+	AvatarID sql.NullString     `json:"avatar_id" bson:"avatar_id"`
 	Avatar   *Asset             `json:"avatar" bson:"-"`
 	Metadata global.EmbedJSON   `json:"metadata" bson:"metadata"`
 

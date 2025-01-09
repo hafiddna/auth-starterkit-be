@@ -1,16 +1,17 @@
 package entity
 
 import (
+	"database/sql"
 	"github.com/hafiddna/auth-starterkit-be/entity/global"
 	"gorm.io/datatypes"
 )
 
 type Asset struct {
 	global.Model
-	OwnerType    *string         `gorm:"type:varchar(255)" json:"owner_type"`
-	OwnerID      *string         `gorm:"type:uuid" json:"owner_id"`
+	OwnerType    sql.NullString  `gorm:"type:varchar(255)" json:"owner_type"`
+	OwnerID      sql.NullString  `gorm:"type:uuid" json:"owner_id"`
 	Owner        interface{}     `json:"owner,omitempty"`
-	FolderID     *string         `gorm:"type:uuid;null" json:"folder_id"`
+	FolderID     sql.NullString  `gorm:"type:uuid;null" json:"folder_id"`
 	Folder       *Folder         `gorm:"foreignKey:FolderID" json:"folder,omitempty"`
 	Name         string          `gorm:"type:varchar(255)" json:"name"`
 	Path         string          `gorm:"type:varchar(255)" json:"path"`
