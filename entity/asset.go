@@ -12,7 +12,7 @@ type Asset struct {
 	OwnerID      sql.NullString  `gorm:"type:uuid" json:"owner_id"`
 	Owner        interface{}     `json:"owner,omitempty"`
 	FolderID     sql.NullString  `gorm:"type:uuid;null" json:"folder_id"`
-	Folder       *Folder         `gorm:"foreignKey:FolderID" json:"folder,omitempty"`
+	Folder       Folder          `gorm:"foreignKey:FolderID" json:"folder,omitempty"`
 	Name         string          `gorm:"type:varchar(255)" json:"name"`
 	Path         string          `gorm:"type:varchar(255)" json:"path"`
 	Size         int64           `gorm:"type:bigint;default:0" json:"size"`
@@ -21,10 +21,10 @@ type Asset struct {
 	BucketName   string          `gorm:"type:varchar(255)" json:"bucket_name"`
 	IsPublic     bool            `gorm:"type:boolean;default:false" json:"is_public"`
 	FileMetadata *datatypes.JSON `gorm:"type:jsonb;null" json:"file_metadata"`
-	UserProfiles []*UserProfile  `gorm:"foreignKey:AvatarID" json:"user_profiles,omitempty"`
+	UserProfiles []UserProfile   `gorm:"foreignKey:AvatarID" json:"user_profiles,omitempty"`
 	Languages    []Language      `gorm:"foreignKey:IconID" json:"languages,omitempty"`
 	Shares       []AssetShare    `gorm:"many2many:asset_share" json:"shares,omitempty"`
-	Comments     []*AssetComment `gorm:"many2many:asset_comment" json:"comments,omitempty"`
+	Comments     []AssetComment  `gorm:"many2many:asset_comment" json:"comments,omitempty"`
 	Tags         []Tag           `gorm:"many2many:asset_tag" json:"tags,omitempty"`
 }
 
