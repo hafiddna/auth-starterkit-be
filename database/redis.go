@@ -4,12 +4,9 @@ import (
 	"fmt"
 	"github.com/hafiddna/auth-starterkit-be/config"
 	"github.com/redis/go-redis/v9"
-	"log"
 )
 
 func ConnectToRedis(db int) *redis.Client {
-	log.Println(config.Config.App.Redis)
-
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("%s:%s", config.Config.App.Redis.Host, config.Config.App.Redis.Port),
 		Password: config.Config.App.Redis.Password,

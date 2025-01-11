@@ -14,10 +14,6 @@ import (
 	"time"
 )
 
-var (
-	validator = validator2.New()
-)
-
 func main() {
 	var err error
 
@@ -60,6 +56,9 @@ func main() {
 
 	// Fiber
 	app := fiber.New(fiber.Config{
+		//Prefork:       true,
+		//CaseSensitive: true,
+		//StrictRouting: true,
 		AppName:      config.Config.App.Name,
 		ServerHeader: config.Config.App.ServerName,
 		ErrorHandler: func(c *fiber.Ctx, err error) error {
@@ -72,9 +71,28 @@ func main() {
 		},
 	})
 
+	// Validator
+	validator := validator2.New()
+
 	// Global Middleware
 	app.Use(middleware.CORSMiddleware())
 	app.Use(middleware.LoggerMiddleware)
+	//app.Use(cors.New())
+	//app.Use(compress.New())
+	//app.Use(etag.New())
+	//app.Use(favicon.New())
+	//app.Use(limiter.New(limiter.Config{
+	//	Max: 100,
+	//	LimitReached: func(c *fiber.Ctx) error {
+	//		return c.Status(fiber.StatusTooManyRequests).JSON(&fiber.Map{
+	//			"status":  "fail",
+	//			"message": "You have requested too many in a single time-frame! Please wait another minute!",
+	//		})
+	//	},
+	//}))
+	//app.Use(logger.New())
+	//app.Use(recover.New())
+	//app.Use(requestid.New())
 
 	// Repository
 	roleUserRepository := repository.NewRoleUserRepository(postgreSQL)

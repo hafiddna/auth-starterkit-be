@@ -4,12 +4,9 @@ import (
 	"github.com/hafiddna/auth-starterkit-be/config"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
-	"log"
 )
 
 func ConnectToMinio() (client *minio.Client, err error) {
-	log.Println(config.Config.App.Minio)
-
 	endpoint := config.Config.App.Minio.Host + ":" + config.Config.App.Minio.Port
 	client, err = minio.New(endpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(config.Config.App.Minio.AccessKey, config.Config.App.Minio.SecretKey, ""),
