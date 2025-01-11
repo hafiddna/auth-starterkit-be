@@ -6,9 +6,9 @@ import (
 )
 
 func TestConfig_GetConfig(t *testing.T) {
-	configTest := NewConfig()
-	cfg := configTest.GetConfig()
+	Config, err := GetConfig()
 
-	t.Logf("Config: %+v", cfg)
-	assert.NotNil(t, cfg)
+	t.Logf("Config: %+v", Config)
+	assert.NotNil(t, Config)
+	assert.Nil(t, err)
 }

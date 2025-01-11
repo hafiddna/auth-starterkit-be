@@ -8,37 +8,27 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+	"time"
 )
 
-type PostgreSQL interface {
-	Connect(db string) (*sql.DB, *gorm.DB, error)
-	Disconnect(*sql.DB) error
-}
-
-type postgreSQL struct {
-	config config.CfgStruct
-}
-
-func NewPostgreSQL(config config.CfgStruct) PostgreSQL {
-	return &postgreSQL{
-		config: config,
-	}
-}
-
-func (p *postgreSQL) Connect(db string) (*sql.DB, *gorm.DB, error) {
+func ConnectToPostgreSQL() (gormDB *gorm.DB, err error) {
 	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		p.config.App.PostgreSQL.Host,
-		p.config.App.PostgreSQL.Port,
-		p.config.App.PostgreSQL.Username,
-		p.config.App.PostgreSQL.Password,
-		db,
+		config.Config.App.PostgreSQL.Host,
+		config.Config.App.PostgreSQL.Port,
+		config.Config.App.PostgreSQL.Username,
+		config.Config.App.PostgreSQL.Password,
+		config.Config.App.PostgreSQL.Database,
 	)
 	sqlDB, err := sql.Open("postgres", dsn)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	gormDB, err := gorm.Open(postgres.New(postgres.Config{
+	sqlDB.SetConnMaxLifetime(time.Minute * 3)
+	sqlDB.SetMaxOpenConns(10)
+	sqlDB.SetMaxIdleConns(10)
+
+	gormDB, err = gorm.Open(postgres.New(postgres.Config{
 		Conn: sqlDB,
 	}), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
@@ -51,17 +41,8 @@ func (p *postgreSQL) Connect(db string) (*sql.DB, *gorm.DB, error) {
 	})
 
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return sqlDB, gormDB, nil
-}
-
-func (p *postgreSQL) Disconnect(db *sql.DB) error {
-	err := db.Close()
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return gormDB, nil
 }

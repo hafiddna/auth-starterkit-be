@@ -1,27 +1,69 @@
 package main
 
 import (
-	"context"
 	validator2 "github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
-	config2 "github.com/hafiddna/auth-starterkit-be/config"
+	"github.com/hafiddna/auth-starterkit-be/config"
 	"github.com/hafiddna/auth-starterkit-be/controller"
 	"github.com/hafiddna/auth-starterkit-be/database"
 	"github.com/hafiddna/auth-starterkit-be/helper"
 	"github.com/hafiddna/auth-starterkit-be/middleware"
 	"github.com/hafiddna/auth-starterkit-be/repository"
 	"github.com/hafiddna/auth-starterkit-be/service"
-	"github.com/hafiddna/auth-starterkit-be/tool"
 	"github.com/hafiddna/auth-starterkit-be/util"
 	"time"
 )
 
 var (
-	config = config2.NewConfig().GetConfig()
-	app    = fiber.New(fiber.Config{
-		AppName: config.App.Name,
+	validator = validator2.New()
+)
+
+func main() {
+	var err error
+
+	// Timezone
+	utc, err := time.LoadLocation("UTC")
+	if err != nil {
+		panic(err)
+	}
+	time.Local = utc
+
+	// Config
+	config.Config, err = config.GetConfig()
+	if err != nil {
+		panic(err)
+	}
+
+	// Licensing
+	if err = util.InitApp(); err != nil {
+		panic(err)
+	}
+
+	// MongoDB
+	mongoDB, err := database.ConnectToMongoDB()
+	if err != nil {
+		panic(err)
+	}
+
+	// PostgreSQL
+	postgreSQL, err := database.ConnectToPostgreSQL()
+	if err != nil {
+		panic(err)
+	}
+
+	// Minio
+	// TODO: Enable Minio on Creating File Upload Feature
+	//minio, err := tool.ConnectToMinio()
+	//if err != nil {
+	//	panic(err)
+	//}
+
+	// Fiber
+	app := fiber.New(fiber.Config{
+		AppName:      config.Config.App.Name,
+		ServerHeader: config.Config.App.ServerName,
 		ErrorHandler: func(c *fiber.Ctx, err error) error {
-			return helper.NewResponse(config).SendResponse(helper.ResponseStruct{
+			return helper.SendResponse(helper.ResponseStruct{
 				Ctx:        c,
 				StatusCode: fiber.StatusBadRequest,
 				Message:    "Bad Request",
@@ -30,110 +72,55 @@ var (
 		},
 	})
 
-	ctx                       = context.Background()
-	redisDB                   = database.NewRedis(config, ctx, 15)
-	mongoClient, mongoErr     = database.NewMongoDB(config, ctx).Connect()
-	mongoDB                   = mongoClient.Database(config.App.MongoDB.Database)
-	sqlDB, gormDB, postgreErr = database.NewPostgreSQL(config).Connect(config.App.PostgreSQL.Database)
-	minioClient               = tool.NewMinioTool(config).Connect()
-
-	response  = helper.NewResponse(config)
-	validator = validator2.New()
-)
-
-func main() {
-	// Timezone
-	utc, err := time.LoadLocation("UTC")
-	if err != nil {
-		panic(err)
-	}
-	time.Local = utc
-
-	// Licensing
-	if err = util.NewLicensing(config).InitApp(); err != nil {
-		panic(err)
-	}
-
-	// MongoDB
-	if mongoErr != nil {
-		panic(mongoErr)
-	}
-	defer database.NewMongoDB(config, ctx).Disconnect(mongoClient)
-
-	// PostgreSQL
-	if postgreErr != nil {
-		panic(postgreErr)
-	}
-	defer database.NewPostgreSQL(config).Disconnect(sqlDB)
-
-	// Minio
-	if minioClient == nil {
-		panic("Minio connection failed")
-	}
-
-	// Start::Global Middleware
-	app.Use(middleware.CORSMiddleware(config))
+	// Global Middleware
+	app.Use(middleware.CORSMiddleware())
 	app.Use(middleware.LoggerMiddleware)
-	// End::Global Middleware
 
-	// Start::Routes
-	setUpRoutes()
-	// End::Routes
+	// Repository
+	roleUserRepository := repository.NewRoleUserRepository(postgreSQL)
+	sessionRepository := repository.NewSessionRepository(postgreSQL)
+	userProfileRepository := repository.NewUserProfileRepository(mongoDB)
+	userRepository := repository.NewUserRepository(postgreSQL)
+	userSettingRepository := repository.NewUserSettingRepository(mongoDB)
 
-	app.Listen(":" + config.App.Server.Port)
-}
+	// Service
+	jwtService := service.NewJWTService()
+	sessionService := service.NewSessionService(sessionRepository)
+	userService := service.NewUserService(userRepository, userProfileRepository, userSettingRepository, roleUserRepository)
+	authService := service.NewAuthService(userService, jwtService)
 
-var (
-	// Start::Repository
-	roleUserRepository    = repository.NewRoleUserRepository(gormDB)
-	sessionRepository     = repository.NewSessionRepository(gormDB)
-	userProfileRepository = repository.NewUserProfileRepository(mongoDB)
-	userRepository        = repository.NewUserRepository(gormDB)
-	userSettingRepository = repository.NewUserSettingRepository(mongoDB)
-	// End::Repository
+	// Controller
+	authController := controller.NewAuthController(authService, sessionService, validator)
 
-	// Start::Service
-	authService    = service.NewAuthService(userService, jwtService)
-	jwtService     = service.NewJWTService(config)
-	sessionService = service.NewSessionService(sessionRepository)
-	userService    = service.NewUserService(userRepository, userProfileRepository, userSettingRepository, roleUserRepository)
-	// End::Service
-
-	// Start::Controller
-	authController = controller.NewAuthController(response, validator, authService, sessionService)
-	// End::Controller
-)
-
-func setUpRoutes() {
+	// Routes
 	// Start::Public Routes
 	public := app.Group("/api")
 
-	// Start:Auth
+	// Auth
 	public.Post("/login", authController.Login)
 	public.Post("/refresh-token", authController.Refresh)
-	// End:Auth
 	// End::Public Routes
 
 	// Start::Private Routes
 	private := app.Group("/api")
-	private.Use(middleware.AuthMiddleware(jwtService, response))
+	private.Use(middleware.AuthMiddleware(jwtService))
 
-	// Start:Auth
+	// Auth
 	private.Get("/profile", authController.GetProfile)
 	private.Post("/logout", authController.Logout)
 	//private.Patch("/users/:id/account-activation", userController.AccountActivation)
 	//private.Patch("/users/:id/assign-roles", userController.AssignRoles)
-	// End:Auth
 	// End::Private Routes
 
-	// Start::Not Found Handler
+	// Not Found
 	app.Use(func(c *fiber.Ctx) error {
-		return response.SendResponse(helper.ResponseStruct{
+		return helper.SendResponse(helper.ResponseStruct{
 			Ctx:        c,
 			StatusCode: fiber.StatusNotFound,
 			Message:    "Not Found",
 			Error:      "Cannot " + c.Method() + " " + c.Path(),
 		})
 	})
-	// End::Not Found Handler
+
+	app.Listen(":" + config.Config.App.Server.Port)
 }

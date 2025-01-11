@@ -4,31 +4,19 @@ import (
 	"github.com/hafiddna/auth-starterkit-be/config"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
+	"log"
 )
 
-type MinioTool interface {
-	Connect() *minio.Client
-}
+func ConnectToMinio() (client *minio.Client, err error) {
+	log.Println(config.Config.App.Minio)
 
-type minioTool struct {
-	config config.CfgStruct
-}
-
-func NewMinioTool(config config.CfgStruct) MinioTool {
-	return &minioTool{
-		config: config,
-	}
-}
-
-func (m *minioTool) Connect() *minio.Client {
-	configData := m.config
-	endpoint := configData.App.Minio.Host + ":" + configData.App.Minio.Port
-	client, err := minio.New(endpoint, &minio.Options{
-		Creds:  credentials.NewStaticV4(configData.App.Minio.AccessKey, configData.App.Minio.SecretKey, ""),
+	endpoint := config.Config.App.Minio.Host + ":" + config.Config.App.Minio.Port
+	client, err = minio.New(endpoint, &minio.Options{
+		Creds:  credentials.NewStaticV4(config.Config.App.Minio.AccessKey, config.Config.App.Minio.SecretKey, ""),
 		Secure: false, // TODO: Change to true in production
 	})
 	if err != nil {
-		return nil
+		return nil, err
 	}
-	return client
+	return client, nil
 }

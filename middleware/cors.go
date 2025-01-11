@@ -7,11 +7,11 @@ import (
 )
 
 // TODO: Recheck this middleware
-func CORSMiddleware(config config.CfgStruct) fiber.Handler {
+func CORSMiddleware() fiber.Handler {
 	return cors.New(
 		cors.Config{
 			AllowOriginsFunc: nil,
-			AllowOrigins:     config.App.Server.Cors,
+			AllowOrigins:     config.Config.App.Server.Cors,
 			AllowMethods:     "GET, POST, PATCH, PUT, DELETE",
 			AllowHeaders:     "Accept, Content-Type, Content-Length, Accept-Encoding, Accept-Language, X-CSRF-Token, Authorization, X-Requested-With, User-Agent, Connection, Host",
 		},

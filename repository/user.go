@@ -21,8 +21,11 @@ func NewUserRepository(db *gorm.DB) UserRepository {
 
 func (r *userRepository) FindByEmailPhoneOrUsername(credential string) entity.User {
 	var user entity.User
-	r.db.Table("users").Where("email = ? OR phone = ? OR username = ?", credential, credential, credential).Preload("Roles").Preload("Roles.Permissions").First(&user)
+	trx := r.db.Where("email = ? OR phone = ? OR username = ?", credential, credential, credential).Preload("Roles").Preload("Roles.Permissions").First(&user)
 	log.Println("user.Roles", user.Roles)
+	if trx.Error != nil {
+		log.Println("trx.Error", trx.Error)
+	}
 	return user
 }
 

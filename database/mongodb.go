@@ -8,53 +8,30 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type MongoDB interface {
-	Connect() (*mongo.Client, error)
-	Disconnect(*mongo.Client) error
-}
+func ConnectToMongoDB() (database *mongo.Database, err error) {
+	ctx := context.Background()
 
-type mongoDB struct {
-	config config.CfgStruct
-	ctx    context.Context
-}
-
-func NewMongoDB(config config.CfgStruct, ctx context.Context) MongoDB {
-	return &mongoDB{
-		config: config,
-		ctx:    ctx,
-	}
-}
-
-func (m *mongoDB) Connect() (*mongo.Client, error) {
 	uri := fmt.Sprintf("mongodb://%s:%s@%s:%s",
-		m.config.App.MongoDB.Username,
-		m.config.App.MongoDB.Password,
-		m.config.App.MongoDB.Host,
-		m.config.App.MongoDB.Port,
+		config.Config.App.MongoDB.Username,
+		config.Config.App.MongoDB.Password,
+		config.Config.App.MongoDB.Host,
+		config.Config.App.MongoDB.Port,
 	)
 	clientOptions := options.Client().ApplyURI(uri)
 
-	client, err := mongo.Connect(m.ctx, clientOptions)
+	client, err := mongo.Connect(ctx, clientOptions)
 
 	if err != nil {
 		return nil, err
 	}
 
-	err = client.Ping(m.ctx, nil)
+	err = client.Ping(ctx, nil)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return client, nil
-}
+	database = client.Database(config.Config.App.MongoDB.Database)
 
-func (m *mongoDB) Disconnect(client *mongo.Client) error {
-	err := client.Disconnect(m.ctx)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return database, nil
 }

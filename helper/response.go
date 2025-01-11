@@ -22,19 +22,7 @@ type BaseResponse struct {
 	Data       interface{} `json:"data,omitempty" xml:"data"`
 }
 
-type Response interface {
-	SendResponse(baseResponse ResponseStruct) error
-}
-
-type response struct {
-	config config.CfgStruct
-}
-
-func NewResponse(config config.CfgStruct) Response {
-	return &response{config}
-}
-
-func (r *response) SendResponse(baseResponse ResponseStruct) error {
+func SendResponse(baseResponse ResponseStruct) error {
 	newBaseResponse := BaseResponse{
 		StatusCode: baseResponse.StatusCode,
 	}
@@ -48,7 +36,7 @@ func (r *response) SendResponse(baseResponse ResponseStruct) error {
 	}
 
 	if baseResponse.Data != nil {
-		if r.config.App.Environtment == "development" {
+		if config.Config.App.Environtment == "development" {
 			newBaseResponse.Data = baseResponse.Data
 		} else {
 			// TODO: Masking/encoded compression data

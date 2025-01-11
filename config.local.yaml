@@ -1,5 +1,6 @@
 app:
   name: "auth-starterkit-be"
+  server_name: "Auth Starterkit"
   version: "0.0.1"
   environment: "development"
 

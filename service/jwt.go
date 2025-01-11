@@ -23,13 +23,10 @@ type jwtCustomClaim struct {
 }
 
 type jwtService struct {
-	config config.CfgStruct
 }
 
-func NewJWTService(config config.CfgStruct) JWTService {
-	return &jwtService{
-		config: config,
-	}
+func NewJWTService() JWTService {
+	return &jwtService{}
 }
 
 func (j *jwtService) GenerateToken(userID, systemRole string, teamIds, roles, permissions []string) string {
@@ -37,7 +34,7 @@ func (j *jwtService) GenerateToken(userID, systemRole string, teamIds, roles, pe
 
 	claims := &jwtCustomClaim{
 		RegisteredClaims: jwt.RegisteredClaims{
-			Issuer:    j.config.App.Name,
+			Issuer:    config.Config.App.Name,
 			Subject:   userID,
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 2)),
 			NotBefore: jwt.NewNumericDate(time.Now()),
@@ -53,7 +50,7 @@ func (j *jwtService) GenerateToken(userID, systemRole string, teamIds, roles, pe
 	var rsaPrivateKey *rsa.PrivateKey
 	var err error
 
-	privateKey := []byte(j.config.App.JWT.PrivateKey)
+	privateKey := []byte(config.Config.App.JWT.PrivateKey)
 
 	rsaPrivateKey, err = jwt.ParseRSAPrivateKeyFromPEM(privateKey)
 
@@ -72,7 +69,7 @@ func (j *jwtService) GenerateToken(userID, systemRole string, teamIds, roles, pe
 }
 
 func (j *jwtService) ValidateToken(token string) (*jwt.Token, error) {
-	publicKey := []byte(j.config.App.JWT.PublicKey)
+	publicKey := []byte(config.Config.App.JWT.PublicKey)
 
 	rsaPublicKey, err := jwt.ParseRSAPublicKeyFromPEM(publicKey)
 	if err != nil {

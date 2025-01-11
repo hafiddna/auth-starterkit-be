@@ -20,25 +20,23 @@ type AuthController interface {
 }
 
 type authController struct {
-	response       helper.Response
-	validator      *validator.Validate
 	authService    service.AuthService
 	sessionService service.SessionService
+	validator      *validator.Validate
 }
 
-func NewAuthController(response helper.Response, validator *validator.Validate, authService service.AuthService, sessionService service.SessionService) AuthController {
+func NewAuthController(authService service.AuthService, sessionService service.SessionService, validator *validator.Validate) AuthController {
 	return &authController{
-		response:       response,
-		validator:      validator,
 		authService:    authService,
 		sessionService: sessionService,
+		validator:      validator,
 	}
 }
 
 func (a *authController) Login(c *fiber.Ctx) error {
 	var loginDto dto.LoginDto
 	if err := c.BodyParser(&loginDto); err != nil {
-		return a.response.SendResponse(helper.ResponseStruct{
+		return helper.SendResponse(helper.ResponseStruct{
 			Ctx:        c,
 			StatusCode: fiber.StatusBadRequest,
 			Message:    "Bad Request",
@@ -50,7 +48,7 @@ func (a *authController) Login(c *fiber.Ctx) error {
 		body := reflect.TypeOf(loginDto)
 		errorMessages := helper.Validate(body, err)
 
-		return a.response.SendResponse(helper.ResponseStruct{
+		return helper.SendResponse(helper.ResponseStruct{
 			Ctx:        c,
 			StatusCode: fiber.StatusBadRequest,
 			Message:    "Bad Request",
@@ -60,14 +58,14 @@ func (a *authController) Login(c *fiber.Ctx) error {
 
 	user := a.authService.ValidateUser(loginDto)
 	if user == nil {
-		return a.response.SendResponse(helper.ResponseStruct{
+		return helper.SendResponse(helper.ResponseStruct{
 			Ctx:        c,
 			StatusCode: fiber.StatusUnauthorized,
 			Message:    "Unauthorized",
 		})
 	}
 
-	return a.response.SendResponse(helper.ResponseStruct{
+	return helper.SendResponse(helper.ResponseStruct{
 		Ctx:        c,
 		StatusCode: fiber.StatusUnauthorized,
 		Message:    "Unauthorized",
@@ -75,7 +73,7 @@ func (a *authController) Login(c *fiber.Ctx) error {
 
 	accessToken := a.authService.Login(user.(entity.User))
 	if accessToken == nil {
-		return a.response.SendResponse(helper.ResponseStruct{
+		return helper.SendResponse(helper.ResponseStruct{
 			Ctx:        c,
 			StatusCode: fiber.StatusUnauthorized,
 			Message:    "Your account has been deactivated.",
@@ -102,7 +100,7 @@ func (a *authController) Login(c *fiber.Ctx) error {
 		LastActivity: time.Now().Unix(),
 	})
 
-	return a.response.SendResponse(helper.ResponseStruct{
+	return helper.SendResponse(helper.ResponseStruct{
 		Ctx:        c,
 		StatusCode: fiber.StatusOK,
 		Message:    "Success",
@@ -117,7 +115,7 @@ func (a *authController) Refresh(c *fiber.Ctx) error {
 func (a *authController) GetProfile(c *fiber.Ctx) error {
 	userId, isString := c.Locals("user").(map[string]interface{})["sub"].(string)
 	if !isString {
-		return a.response.SendResponse(helper.ResponseStruct{
+		return helper.SendResponse(helper.ResponseStruct{
 			Ctx:        c,
 			StatusCode: fiber.StatusUnauthorized,
 			Message:    "Unauthorized",
@@ -129,7 +127,7 @@ func (a *authController) GetProfile(c *fiber.Ctx) error {
 
 	user := a.authService.Profile(userId)
 
-	return a.response.SendResponse(helper.ResponseStruct{
+	return helper.SendResponse(helper.ResponseStruct{
 		Ctx:        c,
 		StatusCode: fiber.StatusOK,
 		Message:    "Success",

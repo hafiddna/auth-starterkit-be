@@ -18,14 +18,14 @@ var (
 	color                            int
 )
 
-func DiscordLogger(config config.CfgStruct, logTypeParam, titleParam, messageParam, serviceParam string, detailParam map[string]interface{}) {
+func DiscordLogger(logTypeParam, titleParam, messageParam, serviceParam string, detailParam map[string]interface{}) {
 	logType = logTypeParam
 	title = titleParam
 	message = messageParam
 	service = serviceParam
 	detail = detailParam
 
-	discord, err := discordgo.New("Bot " + config.App.Discord.Token)
+	discord, err := discordgo.New("Bot " + config.Config.App.Discord.Token)
 	if err != nil {
 		log.Println("error creating Discord session,", err)
 	}

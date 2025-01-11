@@ -5,6 +5,7 @@ import "github.com/spf13/viper"
 type CfgStruct struct {
 	App struct {
 		Name         string `mapstructure:"name"`
+		ServerName   string `mapstructure:"server_name"`
 		Version      string `mapstructure:"version"`
 		Environtment string `mapstructure:"environment"`
 		Server       struct {
@@ -53,33 +54,23 @@ type CfgStruct struct {
 	} `mapstructure:"app"`
 }
 
-type Config interface {
-	GetConfig() CfgStruct
-}
+var Config CfgStruct
 
-type config struct {
-}
-
-func NewConfig() Config {
-	return &config{}
-}
-
-func (c *config) GetConfig() CfgStruct {
+func GetConfig() (cfg CfgStruct, err error) {
 	conf := viper.New()
 	conf.SetConfigName("config")
 	conf.AddConfigPath(".")
 	conf.SetConfigType("yaml")
 
-	err := conf.ReadInConfig()
+	err = conf.ReadInConfig()
 	if err != nil {
-		panic(err)
+		return cfg, err
 	}
 
-	var cfg CfgStruct
 	err = conf.Unmarshal(&cfg)
 	if err != nil {
-		panic(err)
+		return cfg, err
 	}
 
-	return cfg
+	return cfg, nil
 }
