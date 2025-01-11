@@ -65,12 +65,6 @@ func (a *authController) Login(c *fiber.Ctx) error {
 		})
 	}
 
-	return helper.SendResponse(helper.ResponseStruct{
-		Ctx:        c,
-		StatusCode: fiber.StatusUnauthorized,
-		Message:    "Unauthorized",
-	})
-
 	accessToken := a.authService.Login(user)
 	if accessToken == nil {
 		return helper.SendResponse(helper.ResponseStruct{
@@ -98,8 +92,7 @@ func (a *authController) Login(c *fiber.Ctx) error {
 		},
 		Payload:      "",
 		LastActivity: time.Now().Unix(),
-	}, "")
-	// TODO: Fill UserID
+	}, userId)
 
 	return helper.SendResponse(helper.ResponseStruct{
 		Ctx:        c,

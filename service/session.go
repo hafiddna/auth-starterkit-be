@@ -20,5 +20,5 @@ func NewSessionService(sessionRepository repository.SessionRepository) SessionSe
 }
 
 func (s *sessionService) Create(session entity.Session, userID string) error {
-	return s.sessionRepository.Create(session, "")
+	return s.sessionRepository.Create(session, userID)
 }

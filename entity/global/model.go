@@ -13,7 +13,14 @@ type Model struct {
 
 func (m *Model) Created(userID string) {
 	timestamp := time.Now().UnixNano() / int64(time.Millisecond)
-	m.Metadata = []byte(`{"created_by": "` + userID + `", "created_at": ` + strconv.FormatInt(timestamp, 10) + `, "updated_by": "` + userID + `", "updated_at": ` + strconv.FormatInt(timestamp, 10) + `}`)
+	m.Metadata = []byte(`{
+		"created_by": "` + userID + `",
+		"created_at": ` + strconv.FormatInt(timestamp, 10) + `,
+		"updated_by": "` + userID + `",
+		"updated_at": ` + strconv.FormatInt(timestamp, 10) + `,
+		"deleted_by": null,
+		"deleted_at": null
+	}`)
 }
 
 func (m *Model) Updated(userID string) {
