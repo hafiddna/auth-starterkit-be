@@ -56,8 +56,8 @@ func (a *authController) Login(c *fiber.Ctx) error {
 		})
 	}
 
-	user := a.authService.ValidateUser(loginDto)
-	if user == nil {
+	user, err := a.authService.ValidateUser(loginDto)
+	if err != nil {
 		return helper.SendResponse(helper.ResponseStruct{
 			Ctx:        c,
 			StatusCode: fiber.StatusUnauthorized,
@@ -71,7 +71,7 @@ func (a *authController) Login(c *fiber.Ctx) error {
 		Message:    "Unauthorized",
 	})
 
-	accessToken := a.authService.Login(user.(entity.User))
+	accessToken := a.authService.Login(user)
 	if accessToken == nil {
 		return helper.SendResponse(helper.ResponseStruct{
 			Ctx:        c,
@@ -81,7 +81,7 @@ func (a *authController) Login(c *fiber.Ctx) error {
 	}
 
 	userAgent := c.Get("User-Agent")
-	userId := user.(entity.User).ID
+	userId := user.ID
 	ipAddress := c.IP()
 	go a.sessionService.Create(entity.Session{
 		UserID: sql.NullString{
@@ -98,7 +98,8 @@ func (a *authController) Login(c *fiber.Ctx) error {
 		},
 		Payload:      "",
 		LastActivity: time.Now().Unix(),
-	})
+	}, "")
+	// TODO: Fill UserID
 
 	return helper.SendResponse(helper.ResponseStruct{
 		Ctx:        c,
@@ -125,7 +126,14 @@ func (a *authController) GetProfile(c *fiber.Ctx) error {
 
 	// TODO: Update session last activity here
 
-	user := a.authService.Profile(userId)
+	user, err := a.authService.Profile(userId)
+	if err != nil {
+		return helper.SendResponse(helper.ResponseStruct{
+			Ctx:        c,
+			StatusCode: fiber.StatusNotFound,
+			Message:    "Not Found",
+		})
+	}
 
 	return helper.SendResponse(helper.ResponseStruct{
 		Ctx:        c,

@@ -6,8 +6,8 @@ import (
 )
 
 type UserService interface {
-	FindByEmailPhoneOrUsername(credential string) entity.User
-	Profile(id string) map[string]interface{}
+	FindByEmailPhoneOrUsername(credential string) (user entity.User, err error)
+	Profile(id string) (data map[string]interface{}, err error)
 }
 
 type userService struct {
@@ -26,19 +26,28 @@ func NewUserService(userRepository repository.UserRepository, userProfile reposi
 	}
 }
 
-func (s *userService) FindByEmailPhoneOrUsername(credential string) entity.User {
+func (s *userService) FindByEmailPhoneOrUsername(credential string) (user entity.User, err error) {
 	return s.userRepository.FindByEmailPhoneOrUsername(credential)
 }
 
-func (s *userService) Profile(id string) map[string]interface{} {
-	user := s.userRepository.FindOneById(id)
-	profile := s.userProfile.FindOneByUserID(id)
+func (s *userService) Profile(id string) (data map[string]interface{}, err error) {
+	user, err := s.userRepository.FindOneById(id)
+	if err != nil {
+		return nil, err
+	}
 
-	return map[string]interface{}{
+	profile, err := s.userProfile.FindOneByUserID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	data = map[string]interface{}{
 		"username":          user.Username,
 		"email_verified_at": user.EmailVerifiedAt,
 		"phone_verified_at": user.PhoneVerifiedAt,
-		"full_name":         profile.(entity.UserProfile).FullName,
-		"nick_name":         profile.(entity.UserProfile).NickName,
+		"full_name":         profile.FullName,
+		"nick_name":         profile.NickName,
 	}
+
+	return data, nil
 }

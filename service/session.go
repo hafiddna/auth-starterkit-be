@@ -6,7 +6,7 @@ import (
 )
 
 type SessionService interface {
-	Create(session entity.Session) interface{}
+	Create(session entity.Session, userID string) error
 }
 
 type sessionService struct {
@@ -19,6 +19,6 @@ func NewSessionService(sessionRepository repository.SessionRepository) SessionSe
 	}
 }
 
-func (s *sessionService) Create(session entity.Session) interface{} {
-	return s.sessionRepository.Create(session)
+func (s *sessionService) Create(session entity.Session, userID string) error {
+	return s.sessionRepository.Create(session, "")
 }

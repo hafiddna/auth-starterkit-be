@@ -7,8 +7,8 @@ import (
 )
 
 type UserRepository interface {
-	FindByEmailPhoneOrUsername(credential string) entity.User
-	FindOneById(id string) entity.User
+	FindByEmailPhoneOrUsername(credential string) (user entity.User, err error)
+	FindOneById(id string) (user entity.User, err error)
 }
 
 type userRepository struct {
@@ -19,18 +19,21 @@ func NewUserRepository(db *gorm.DB) UserRepository {
 	return &userRepository{db: db}
 }
 
-func (r *userRepository) FindByEmailPhoneOrUsername(credential string) entity.User {
-	var user entity.User
-	trx := r.db.Where("email = ? OR phone = ? OR username = ?", credential, credential, credential).Preload("Roles").Preload("Roles.Permissions").First(&user)
-	log.Println("user.Roles", user.Roles)
-	if trx.Error != nil {
-		log.Println("trx.Error", trx.Error)
+func (r *userRepository) FindByEmailPhoneOrUsername(credential string) (user entity.User, err error) {
+	err = r.db.Where("email = ? OR phone = ? OR username = ?", credential, credential, credential).Preload("Roles").Preload("Roles.Permissions").First(&user).Error
+	if err != nil {
+		return user, err
 	}
-	return user
+
+	log.Println("user.Roles", user.Roles)
+	return user, nil
 }
 
-func (r *userRepository) FindOneById(id string) entity.User {
-	var user entity.User
-	r.db.Where("id = ?", id).First(&user)
-	return user
+func (r *userRepository) FindOneById(id string) (user entity.User, err error) {
+	err = r.db.Where("id = ?", id).First(&user).Error
+	if err != nil {
+		return user, err
+	}
+
+	return user, nil
 }

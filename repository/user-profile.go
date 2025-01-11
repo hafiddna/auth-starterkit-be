@@ -8,7 +8,7 @@ import (
 )
 
 type UserProfileRepository interface {
-	FindOneByUserID(id string) interface{}
+	FindOneByUserID(id string) (data entity.UserProfile, err error)
 }
 
 type userProfileRepository struct {
@@ -23,13 +23,13 @@ func NewUserProfileRepository(db *mongo.Database) UserProfileRepository {
 	return &userProfileRepository{db: db}
 }
 
-func (r *userProfileRepository) FindOneByUserID(id string) interface{} {
+func (r *userProfileRepository) FindOneByUserID(id string) (data entity.UserProfile, err error) {
 	var userProfile entity.UserProfile
 
-	err := r.environment().FindOne(context.TODO(), bson.M{"user_id": id}).Decode(&userProfile)
+	err = r.environment().FindOne(context.TODO(), bson.M{"user_id": id}).Decode(&userProfile)
 	if err != nil {
-		return nil
+		return userProfile, err
 	}
 
-	return userProfile
+	return userProfile, nil
 }

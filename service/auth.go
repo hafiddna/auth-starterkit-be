@@ -1,15 +1,16 @@
 package service
 
 import (
+	"fmt"
 	"github.com/hafiddna/auth-starterkit-be/dto"
 	"github.com/hafiddna/auth-starterkit-be/entity"
 	"github.com/hafiddna/auth-starterkit-be/helper"
 )
 
 type AuthService interface {
-	ValidateUser(dto dto.LoginDto) interface{}
+	ValidateUser(dto dto.LoginDto) (user entity.User, err error)
 	Login(user entity.User) interface{}
-	Profile(id string) interface{}
+	Profile(id string) (data map[string]interface{}, err error)
 }
 
 type authService struct {
@@ -24,13 +25,17 @@ func NewAuthService(userService UserService, jwtService JWTService) AuthService 
 	}
 }
 
-func (a *authService) ValidateUser(dto dto.LoginDto) interface{} {
-	user := a.userService.FindByEmailPhoneOrUsername(dto.Credential)
-	if helper.ComparePassword(user.Password, dto.Password) {
-		return user
+func (a *authService) ValidateUser(dto dto.LoginDto) (user entity.User, err error) {
+	user, err = a.userService.FindByEmailPhoneOrUsername(dto.Credential)
+	if err != nil {
+		return user, err
 	}
 
-	return nil
+	if helper.ComparePassword(user.Password, dto.Password) {
+		return user, nil
+	}
+
+	return user, fmt.Errorf("invalid password")
 }
 
 func (a *authService) Login(user entity.User) interface{} {
@@ -55,9 +60,9 @@ func (a *authService) Login(user entity.User) interface{} {
 	return a.jwtService.GenerateToken(user.ID, "", []string{}, roles, permissions)
 }
 
-func (a *authService) Profile(id string) interface{} {
+func (a *authService) Profile(id string) (data map[string]interface{}, err error) {
 	if !helper.IsUUID(id) {
-		return nil
+		return nil, fmt.Errorf("invalid id")
 	}
 
 	return a.userService.Profile(id)
