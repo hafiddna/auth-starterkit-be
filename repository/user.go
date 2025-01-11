@@ -3,7 +3,6 @@ package repository
 import (
 	"github.com/hafiddna/auth-starterkit-be/entity"
 	"gorm.io/gorm"
-	"log"
 )
 
 type UserRepository interface {
@@ -20,12 +19,11 @@ func NewUserRepository(db *gorm.DB) UserRepository {
 }
 
 func (r *userRepository) FindByEmailPhoneOrUsername(credential string) (user entity.User, err error) {
-	err = r.db.Where("email = ? OR phone = ? OR username = ?", credential, credential, credential).Preload("Roles").Preload("Roles.Permissions").First(&user).Error
+	err = r.db.Where("email = ?", credential).Or("phone = ?", credential).Or("username = ?", credential).Preload("Roles").Preload("Roles.Permissions").First(&user).Error
 	if err != nil {
 		return user, err
 	}
 
-	log.Println("user.Roles", user.Roles)
 	return user, nil
 }
 
