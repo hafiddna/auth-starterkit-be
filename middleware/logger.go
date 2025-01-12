@@ -2,10 +2,9 @@ package middleware
 
 import (
 	"fmt"
+	"github.com/gofiber/fiber/v2"
 	"log"
 	"time"
-
-	"github.com/gofiber/fiber/v2"
 )
 
 func LoggerMiddleware(c *fiber.Ctx) error {
