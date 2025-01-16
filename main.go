@@ -150,6 +150,7 @@ func main() {
 	public := app.Group("/api")
 
 	// Auth
+	//public.Post("/register", authController.Register)
 	public.Post("/login", authController.Login)
 	public.Post("/refresh-token", authController.Refresh)
 	// End::Public Routes
