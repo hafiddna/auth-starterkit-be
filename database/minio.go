@@ -10,7 +10,7 @@ func ConnectToMinio() (client *minio.Client, err error) {
 	endpoint := config.Config.App.Minio.Host + ":" + config.Config.App.Minio.Port
 	client, err = minio.New(endpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(config.Config.App.Minio.AccessKey, config.Config.App.Minio.SecretKey, ""),
-		Secure: false, // TODO: Change to true in production
+		Secure: config.Config.App.Environment == "production",
 	})
 	if err != nil {
 		return nil, err

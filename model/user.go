@@ -2,7 +2,6 @@ package model
 
 import "database/sql"
 
-// TODO: Check why the relationships is failing
 type User struct {
 	Model
 	Email                  sql.NullString `gorm:"unique;nullable" json:"email"`
