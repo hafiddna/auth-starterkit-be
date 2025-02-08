@@ -6,6 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/etag"
+	"github.com/gofiber/fiber/v2/middleware/favicon"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
@@ -63,7 +64,10 @@ func SetupRoutes(app *fiber.App) {
 	}))
 	app.Use(compress.New())
 	app.Use(etag.New())
-	//app.Use(favicon.New())
+	app.Use(favicon.New(favicon.Config{
+		File: "./asset/favicon.ico",
+		URL:  "/favicon.ico",
+	}))
 	//app.Use(limiter.New(limiter.Config{
 	//	Max: 100,
 	//	LimitReached: func(c *fiber.Ctx) error {
