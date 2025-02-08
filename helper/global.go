@@ -7,10 +7,6 @@ import (
 	mathRand "math/rand"
 )
 
-func Unmarshal(data []byte, v interface{}) error {
-	return json.Unmarshal(data, v)
-}
-
 func RandomString(length int) string {
 	bytes := make([]byte, length)
 
@@ -25,7 +21,11 @@ func RandomInt(min int, max int) int {
 	return min + mathRand.Intn(max-min)
 }
 
-func JSONEncode(data interface{}) string {
+func JSONUnmarshal(data []byte, v interface{}) error {
+	return json.Unmarshal(data, v)
+}
+
+func JSONMarshal(data interface{}) string {
 	jsonResult, _ := json.Marshal(data)
 
 	return string(jsonResult)

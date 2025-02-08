@@ -58,7 +58,6 @@ func SetupRoutes(app *fiber.App) {
 	//}))
 	app.Use(recover.New())
 	app.Use(requestid.New())
-	//app.Use(middleware.LoggerMiddleware)
 	//file, err := os.OpenFile("./123.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	//if err != nil {
 	//	log.Fatalf("error opening file: %v", err)
@@ -69,7 +68,6 @@ func SetupRoutes(app *fiber.App) {
 		TimeFormat: time.RFC3339Nano,
 		TimeZone:   "UTC",
 		Done: func(c *fiber.Ctx, logString []byte) {
-			log.Println(string(logString))
 			//if c.Response().StatusCode() != fiber.StatusOK {
 			//reporter.SendToSlack(logString)
 			//}
