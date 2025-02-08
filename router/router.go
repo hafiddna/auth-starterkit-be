@@ -1,7 +1,7 @@
 package router
 
 import (
-	"github.com/go-playground/validator/v10"
+	validator2 "github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -10,7 +10,12 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 	"github.com/hafiddna/auth-starterkit-be/config"
+	"github.com/hafiddna/auth-starterkit-be/controller"
 	"github.com/hafiddna/auth-starterkit-be/database"
+	"github.com/hafiddna/auth-starterkit-be/helper"
+	"github.com/hafiddna/auth-starterkit-be/middleware"
+	"github.com/hafiddna/auth-starterkit-be/repository"
+	"github.com/hafiddna/auth-starterkit-be/service"
 	"log"
 	"strings"
 	"time"
@@ -38,7 +43,7 @@ func SetupRoutes(app *fiber.App) {
 	}
 
 	// Validator
-	validator := validator.New()
+	validator := validator2.New()
 
 	// Middleware
 	app.Use(cors.New(cors.Config{
@@ -94,40 +99,52 @@ func SetupRoutes(app *fiber.App) {
 	}))
 
 	// Repository
+	roleUserRepository := repository.NewRoleUserRepository(postgres)
+	sessionRepository := repository.NewSessionRepository(postgres)
+	userProfileRepository := repository.NewUserProfileRepository(mongo)
+	userRepository := repository.NewUserRepository(postgres, minio)
+	userSettingRepository := repository.NewUserSettingRepository(mongo)
 
 	// Service
+	sessionService := service.NewSessionService(sessionRepository)
+	userService := service.NewUserService(userRepository, userProfileRepository, userSettingRepository, roleUserRepository)
+	authService := service.NewAuthService(userService)
 
 	// Controller
+	authController := controller.NewAuthController(authService, sessionService, validator)
 
-	//Route::middleware('guest')->group(function () {
-	//	//    Route::get('register', [RegisteredUserController::class, 'create'])->name('register');
-	//
-	//	//    Route::post('register', [RegisteredUserController::class, 'store']);
-	//
-	//Route::get('login', [AuthenticatedSessionController::class, 'create'])->name('login');
-	//
-	//Route::post('login', [AuthenticatedSessionController::class, 'store']);
-	//
-	////    Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])->name('password.request');
-	//
-	////    Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])->name('password.email');
-	//
-	////    Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
-	//
-	////    Route::post('reset-password', [NewPasswordController::class, 'store'])->name('password.update');
-	//});
-	//
-	//Route::middleware('auth')->group(function () {
-	////    Route::get('verify-email', [EmailVerificationPromptController::class, '__invoke'])->name('verification.notice');
-	//
-	////    Route::get('verify-email/{id}/{hash}', [VerifyEmailController::class, '__invoke'])->middleware(['signed', 'throttle:6,1'])->name('verification.verify');
-	//
-	////    Route::post('email/verification-notification', [EmailVerificationNotificationController::class, 'store'])->middleware('throttle:6,1')->name('verification.send');
-	//
-	////    Route::get('confirm-password', [ConfirmablePasswordController::class, 'show'])->name('password.confirm');
-	//
-	////    Route::post('confirm-password', [ConfirmablePasswordController::class, 'store']);
-	//
-	//Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
-	//});
+	// Routes
+	// Start::Public Routes
+	public := app.Group("/api")
+
+	// Auth
+	//public.Post("/register", authController.Register)
+	public.Post("/login", authController.Login)
+	public.Get("/refresh", authController.Refresh)
+	//public.Post("/forgot-password", authController.ForgotPassword)
+	//public.Post("/reset-password", authController.ResetPassword)
+	// End::Public Routes
+
+	// Start::Private Routes
+	private := app.Group("/api")
+	private.Use(middleware.AuthMiddleware())
+
+	// Auth
+	private.Get("/profile", authController.GetProfile)
+	//private.Patch("/profile", authController.UpdateProfile)
+	//private.Post("/verify-email/{id}/{hash}", authController.VerifyEmail)
+	//private.Post("/change-password", authController.ChangePassword)
+	//private.Patch("/users/:id/account-activation", userController.AccountActivation)
+	private.Post("/logout", authController.Logout)
+	// End::Private Routes
+
+	// Not Found
+	app.Use(func(c *fiber.Ctx) error {
+		return helper.SendResponse(helper.ResponseStruct{
+			Ctx:        c,
+			StatusCode: fiber.StatusNotFound,
+			Message:    "Not Found",
+			Error:      "Cannot " + c.Method() + " " + c.Path(),
+		})
+	})
 }
