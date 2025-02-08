@@ -47,7 +47,7 @@ func main() {
 		},
 	})
 
-	// Router
+	// Route
 	router.SetupRoutes(app)
 
 	log.Fatal(app.Listen(":" + config.Config.App.Server.Port))

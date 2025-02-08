@@ -1,6 +1,7 @@
 package router
 
 import (
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -11,6 +12,7 @@ import (
 	"github.com/hafiddna/auth-starterkit-be/config"
 	"github.com/hafiddna/auth-starterkit-be/database"
 	"log"
+	"strings"
 	"time"
 )
 
@@ -18,31 +20,41 @@ func SetupRoutes(app *fiber.App) {
 	var err error
 
 	// Mongo
-	_, err = database.ConnectToMongo()
+	mongo, err := database.ConnectToMongo()
 	if err != nil {
 		log.Fatalf("Error connecting to MongoDB: %v", err)
 	}
 
 	// Postgres
-	_, err = database.ConnectToPostgres()
+	postgres, err := database.ConnectToPostgres()
 	if err != nil {
 		log.Fatalf("Error connecting to PostgreSQL: %v", err)
 	}
 
 	// Minio
-	// TODO: Use Minio for file storage
-	_, err = database.ConnectToMinio()
+	minio, err := database.ConnectToMinio()
 	if err != nil {
 		log.Fatalf("Error connecting to Minio: %v", err)
 	}
 
+	// Validator
+	validator := validator.New()
+
 	// Middleware
-	// TODO: Recheck this middleware
 	app.Use(cors.New(cors.Config{
-		AllowOriginsFunc: nil,
-		AllowOrigins:     config.Config.App.Server.Cors,
+		AllowOriginsFunc: func(origin string) bool {
+			allowedOrigins := strings.Split(config.Config.App.Server.Cors, ",")
+			for _, allowedOrigin := range allowedOrigins {
+				if origin == allowedOrigin {
+					return true
+				}
+			}
+
+			return false
+		},
 		AllowMethods:     "GET, POST, PATCH, PUT, DELETE",
 		AllowHeaders:     "Accept, Content-Type, Content-Length, Accept-Encoding, Accept-Language, X-CSRF-Token, Authorization, X-Requested-With, User-Agent, Connection, Host",
+		AllowCredentials: true,
 	}))
 	app.Use(compress.New())
 	app.Use(etag.New())

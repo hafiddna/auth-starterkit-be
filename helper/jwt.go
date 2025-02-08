@@ -23,7 +23,7 @@ func GenerateToken(userID string, teamIds, roles, permissions []string) string {
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    config.Config.App.ServerName,
 			Subject:   userID,
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 2)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(15 * time.Minute)),
 			NotBefore: jwt.NewNumericDate(time.Now()),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			ID:        uuid.String(),
