@@ -15,7 +15,7 @@ func main() {
 	// Timezone
 	utc, err := time.LoadLocation("UTC")
 	if err != nil {
-		panic(err)
+		log.Fatalf("Error loading timezone: %v", err)
 	}
 	time.Local = utc
 
@@ -27,7 +27,7 @@ func main() {
 
 	// Licensing
 	if err = helper.InitApp(); err != nil {
-		panic(err)
+		log.Fatalf("Error initializing app: %v", err)
 	}
 
 	// Fiber
