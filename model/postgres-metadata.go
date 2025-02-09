@@ -2,6 +2,7 @@ package model
 
 import (
 	"gorm.io/datatypes"
+	"gorm.io/gorm"
 	"strconv"
 	"time"
 )
@@ -23,9 +24,9 @@ func (m *Model) Created(userID string) {
 	}`)
 }
 
-func (m *Model) Updated(userID string) {
-	// TODO: Implement Updated method
-	//timestamp := time.Now().UnixNano() / int64(time.Millisecond)
+func (m *Model) Updated(db *gorm.DB, userID string) {
+	timestamp := time.Now().UnixNano() / int64(time.Millisecond)
+	db.UpdateColumn("metadata", datatypes.JSONSet("metadata").Set("updated_by", userID).Set("updated_at", timestamp))
 }
 
 func (m *Model) SoftDelete(userID string) {

@@ -39,9 +39,11 @@ func (r *sessionRepository) Create(session model.Session) error {
 			Valid:  true,
 		}
 	}
+	session.Created(session.UserID.String)
 	return r.db.Create(&session).Error
 }
 
 func (r *sessionRepository) Update(session model.Session) error {
+	session.Updated(r.db, session.UserID.String)
 	return r.db.Save(&session).Error
 }

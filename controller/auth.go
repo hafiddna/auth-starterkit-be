@@ -90,7 +90,8 @@ func (a *authController) Login(c *fiber.Ctx) error {
 			String: userAgent,
 			Valid:  true,
 		},
-		Payload:      "",
+		Payload: "",
+		// TODO: Update last activity shouldn't just be in here
 		LastActivity: time.Now().Unix(),
 	})
 
