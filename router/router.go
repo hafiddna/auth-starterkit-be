@@ -108,7 +108,7 @@ func SetupRoutes(app *fiber.App) {
 	//	CookieSecure:   config.Config.App.Environment == "production",
 	//	CookieHTTPOnly: config.Config.App.Environment == "production",
 	//	CookieSameSite: "None",
-	//	Expiration:     1 * time.Hour, // TODO: Change to desired expiration
+	//	Expiration:     1 * time.Hour,
 	//}))
 
 	// Repository

@@ -70,7 +70,7 @@ func (a *authController) Login(c *fiber.Ctx) error {
 		return helper.SendResponse(helper.ResponseStruct{
 			Ctx:        c,
 			StatusCode: fiber.StatusUnauthorized,
-			Message:    "Your account has been deactivated.",
+			Message:    "Your account is not active",
 		})
 	}
 

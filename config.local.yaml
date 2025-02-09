@@ -37,6 +37,9 @@ app:
   jwt:
     public: ""
     private: ""
+    csrf_secret: ""
+    remember_token_secret: ""
+    guest_session_secret: ""
 
   discord:
     token: "{token}"
