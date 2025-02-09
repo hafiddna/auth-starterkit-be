@@ -41,7 +41,6 @@ type CfgStruct struct {
 		JWT struct {
 			PublicKey           string `mapstructure:"public"`
 			PrivateKey          string `mapstructure:"private"`
-			CSRFSecret          string `mapstructure:"csrf_secret"`
 			RememberTokenSecret string `mapstructure:"remember_token_secret"`
 			GuestSessionSecret  string `mapstructure:"guest_session_secret"`
 		} `mapstructure:"jwt"`
