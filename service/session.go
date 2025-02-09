@@ -6,7 +6,7 @@ import (
 )
 
 type SessionService interface {
-	Create(session model.Session, userID string) error
+	CreateOrUpdate(session model.Session) error
 }
 
 type sessionService struct {
@@ -19,6 +19,11 @@ func NewSessionService(sessionRepository repository.SessionRepository) SessionSe
 	}
 }
 
-func (s *sessionService) Create(session model.Session, userID string) error {
-	return s.sessionRepository.Create(session, userID)
+func (s *sessionService) CreateOrUpdate(session model.Session) error {
+	err := s.sessionRepository.FindOneByUserID(session.UserID.String)
+	if err != nil {
+		return s.sessionRepository.Create(session)
+	} else {
+		return s.sessionRepository.Update(session)
+	}
 }

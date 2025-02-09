@@ -77,7 +77,7 @@ func (a *authController) Login(c *fiber.Ctx) error {
 	userAgent := c.Get("User-Agent")
 	userId := user.ID
 	ipAddress := c.IP()
-	go a.sessionService.Create(model.Session{
+	go a.sessionService.CreateOrUpdate(model.Session{
 		UserID: sql.NullString{
 			String: userId,
 			Valid:  true,
@@ -92,7 +92,7 @@ func (a *authController) Login(c *fiber.Ctx) error {
 		},
 		Payload:      "",
 		LastActivity: time.Now().Unix(),
-	}, userId)
+	})
 
 	return helper.SendResponse(helper.ResponseStruct{
 		Ctx:        c,

@@ -101,6 +101,15 @@ func SetupRoutes(app *fiber.App) {
 		//DisableColors: true,
 		//Output: file,
 	}))
+	// TODO: Implement CSRF
+	//app.Use(csrf.New(csrf.Config{
+	//	KeyLookup:      "header:X-CSRF-Token",
+	//	CookieName:     "csrf_token",
+	//	CookieSecure:   config.Config.App.Environment == "production",
+	//	CookieHTTPOnly: config.Config.App.Environment == "production",
+	//	CookieSameSite: "None",
+	//	Expiration:     1 * time.Hour, // TODO: Change to desired expiration
+	//}))
 
 	// Repository
 	roleUserRepository := repository.NewRoleUserRepository(postgres)
