@@ -20,8 +20,8 @@ func NewSessionService(sessionRepository repository.SessionRepository) SessionSe
 }
 
 func (s *sessionService) CreateOrUpdate(session model.Session) error {
-	err := s.sessionRepository.FindOneByUserID(session.UserID.String)
-	if err != nil {
+	sessionData, err := s.sessionRepository.FindOneByUserIDAndUserAgent(session.UserID.String, session.UserAgent.String)
+	if err != nil || session.UserAgent.String != sessionData.UserAgent.String {
 		return s.sessionRepository.Create(session)
 	} else {
 		return s.sessionRepository.Update(session)
