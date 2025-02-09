@@ -58,9 +58,10 @@ func SetupRoutes(app *fiber.App) {
 
 			return false
 		},
-		AllowMethods:     "GET, POST, PATCH, PUT, DELETE",
-		AllowHeaders:     "Accept, Content-Type, Content-Length, Accept-Encoding, Accept-Language, X-CSRF-Token, Authorization, X-Requested-With, User-Agent, Connection, Host",
-		AllowCredentials: true,
+		AllowMethods: "GET, POST, PATCH, PUT, DELETE",
+		AllowHeaders: "Content-Type, Content-Length, Host, User-Agent, Accept, Accept-Encoding, Connection, Authorization, Accept-Language",
+		// TODO: Limit ExposeHeaders to only the necessary headers
+		//ExposeHeaders: "",
 	}))
 	app.Use(compress.New())
 	app.Use(etag.New())
