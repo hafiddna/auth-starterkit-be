@@ -28,10 +28,17 @@ func ConnectToPostgres() (gormDB *gorm.DB, err error) {
 	sqlDB.SetMaxOpenConns(10)
 	sqlDB.SetMaxIdleConns(10)
 
+	var gormLogger logger.Interface
+	if config.Config.App.Environment == "development" {
+		gormLogger = logger.Default.LogMode(logger.Info)
+	} else {
+		gormLogger = logger.Default.LogMode(logger.Silent)
+	}
+
 	gormDB, err = gorm.Open(postgres.New(postgres.Config{
 		Conn: sqlDB,
 	}), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info),
+		Logger: gormLogger,
 		//DryRun: true,
 		//SkipHooks: true, // should be using &gorm.Session{SkipHooks: true}
 		//QueryFields: true,

@@ -21,7 +21,7 @@ func NewSessionRepository(db *gorm.DB) SessionRepository {
 }
 
 func (r *sessionRepository) FindOneByUserIDAndUserAgent(userID, userAgent string) (session model.Session, err error) {
-	err = r.db.Where("user_id = ?", userID).Where("user_agent = ?", userAgent).First(&session).Error
+	err = model.WithoutTrashed(r.db).Where("user_id = ?", userID).Where("user_agent = ?", userAgent).First(&session).Error
 	if err != nil {
 		return session, err
 	}
@@ -44,6 +44,5 @@ func (r *sessionRepository) Create(session model.Session) error {
 }
 
 func (r *sessionRepository) Update(session model.Session) error {
-	session.Updated(r.db, session.UserID.String)
-	return r.db.Save(&session).Error
+	return session.Updated(r.db, session.UserID.String).Save(session).Error
 }

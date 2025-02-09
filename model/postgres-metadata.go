@@ -24,12 +24,20 @@ func (m *Model) Created(userID string) {
 	}`)
 }
 
-func (m *Model) Updated(db *gorm.DB, userID string) {
+func (m *Model) Updated(db *gorm.DB, userID string) *gorm.DB {
 	timestamp := time.Now().UnixNano() / int64(time.Millisecond)
-	db.UpdateColumn("metadata", datatypes.JSONSet("metadata").Set("updated_by", userID).Set("updated_at", timestamp))
+	return db.UpdateColumn("metadata", datatypes.JSONSet("metadata").Set("updated_by", userID).Set("updated_at", timestamp))
 }
 
-func (m *Model) SoftDelete(userID string) {
-	// TODO: Implement SoftDelete method
-	//timestamp := time.Now().UnixNano() / int64(time.Millisecond)
+func (m *Model) SoftDelete(db *gorm.DB, userID string) *gorm.DB {
+	timestamp := time.Now().UnixNano() / int64(time.Millisecond)
+	return db.UpdateColumn("metadata", datatypes.JSONSet("metadata").Set("deleted_by", userID).Set("deleted_at", timestamp))
+}
+
+func OnlyTrashed(db *gorm.DB) *gorm.DB {
+	return db.Where("metadata->>'deleted_at' IS NOT NULL").Where("metadata->>'deleted_by' IS NOT NULL")
+}
+
+func WithoutTrashed(db *gorm.DB) *gorm.DB {
+	return db.Where("metadata->>'deleted_at' IS NULL").Where("metadata->>'deleted_by' IS NULL")
 }

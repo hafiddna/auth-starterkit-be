@@ -1,7 +1,7 @@
 package model
 
 type I18n struct {
-	ID string `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
+	Model
 	//Translations []Translation `gorm:"foreignKey:I18nID" json:"translations"`
 }
 
