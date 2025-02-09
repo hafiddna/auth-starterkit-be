@@ -27,6 +27,8 @@ func GenerateToken(userID string, teamIds, roles, permissions []string) string {
 			NotBefore: jwt.NewNumericDate(time.Now()),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			ID:        uuid.String(),
+			// TODO: What is the meaning of this???
+			//Audience:
 		},
 		TeamSub:     teamIds,
 		Roles:       roles,
