@@ -79,10 +79,10 @@ func IsUUID(uuid string) bool {
 }
 
 type EncryptedData struct {
-	IV    string
-	Value string
-	MAC   string
-	Tag   string
+	IV    string `json:"iv"`
+	Value string `json:"value"`
+	MAC   string `json:"mac"`
+	Tag   string `json:"tag"`
 }
 
 func GenerateIV() ([]byte, error) {

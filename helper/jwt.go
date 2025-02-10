@@ -12,12 +12,7 @@ import (
 
 type jwtGeneralClaim struct {
 	jwt.RegisteredClaims
-	Data struct {
-		IV    string `json:"iv"`
-		Value string `json:"value"`
-		MAC   string `json:"mac"`
-		Tag   string `json:"tag"`
-	} `json:"data"`
+	Data EncryptedData `json:"data"`
 }
 
 type JwtAuthClaim struct {
@@ -54,12 +49,7 @@ func GenerateRS512Token(privateKey, key, userID string, data interface{}, durati
 			// TODO: What is the meaning of this???
 			//Audience:
 		},
-		Data: struct {
-			IV    string `json:"iv"`
-			Value string `json:"value"`
-			MAC   string `json:"mac"`
-			Tag   string `json:"tag"`
-		}{
+		Data: EncryptedData{
 			IV:    encryptedData.IV,
 			Value: encryptedData.Value,
 			MAC:   encryptedData.MAC,

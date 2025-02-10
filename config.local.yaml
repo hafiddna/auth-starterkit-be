@@ -47,3 +47,4 @@ app:
   secret:
     auth_key: ""
     remember_token_key: ""
+    data_encryption_key: ""

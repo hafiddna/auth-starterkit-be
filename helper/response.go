@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	"github.com/gofiber/fiber/v2"
 	"github.com/hafiddna/auth-starterkit-be/config"
+	"log"
 )
 
 type ResponseStruct struct {
@@ -22,7 +23,7 @@ type BaseResponse struct {
 	Data       interface{} `json:"data,omitempty" xml:"data"`
 }
 
-func SendResponse(baseResponse ResponseStruct) error {
+func SendResponse(baseResponse ResponseStruct) (err error) {
 	newBaseResponse := BaseResponse{
 		StatusCode: baseResponse.StatusCode,
 	}
@@ -39,7 +40,12 @@ func SendResponse(baseResponse ResponseStruct) error {
 		if config.Config.App.Environment == "development" {
 			newBaseResponse.Data = baseResponse.Data
 		} else {
-			// TODO: Masking/encoded compression data
+			marshalledData := JSONMarshal(baseResponse.Data)
+
+			newBaseResponse.Data, err = EncryptAES256CBC([]byte(marshalledData), []byte(config.Config.App.Secret.DataEncryptionKey))
+			if err != nil {
+				log.Fatalf("Error encrypting data: %v", err)
+			}
 		}
 	}
 
