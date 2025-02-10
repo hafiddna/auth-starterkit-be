@@ -220,3 +220,64 @@ func TestIsUUID(t *testing.T) {
 		})
 	}
 }
+
+func TestEncryptAES256CBC(t *testing.T) {
+	type args struct {
+		data []byte
+		key  []byte
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name:    "success",
+			args:    args{data: []byte("john doe"), key: []byte("12345678901234567890123456789012")},
+			wantErr: false,
+		},
+		{
+			name:    "failed",
+			args:    args{data: []byte("john doe"), key: []byte("key")},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if _, err := EncryptAES256CBC(tt.args.data, tt.args.key); (err != nil) != tt.wantErr {
+				t.Errorf("EncryptAES256CBC() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestDecryptAES256CBC(t *testing.T) {
+	type args struct {
+		data []byte
+		key  []byte
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name:    "success",
+			args:    args{data: []byte("john doe"), key: []byte("12345678901234567890123456789012")},
+			wantErr: false,
+		},
+		{
+			name:    "failed",
+			args:    args{data: []byte("john doe"), key: []byte("key")},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			encryptedData, _ := EncryptAES256CBC([]byte("john doe"), []byte("12345678901234567890123456789012"))
+			if _, err := DecryptAES256CBC(encryptedData, tt.args.key); (err != nil) != tt.wantErr {
+				t.Errorf("DecryptAES256CBC() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}

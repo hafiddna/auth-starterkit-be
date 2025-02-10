@@ -39,14 +39,19 @@ type CfgStruct struct {
 			SecretKey string `mapstructure:"secret_key"`
 		} `mapstructure:"minio"`
 		JWT struct {
-			PublicKey           string `mapstructure:"public"`
-			PrivateKey          string `mapstructure:"private"`
-			RememberTokenSecret string `mapstructure:"remember_token_secret"`
-			GuestSessionSecret  string `mapstructure:"guest_session_secret"`
+			PublicKey            string `mapstructure:"public"`
+			PrivateKey           string `mapstructure:"private"`
+			RememberTokenPublic  string `mapstructure:"remember_token_public"`
+			RememberTokenPrivate string `mapstructure:"remember_token_private"`
+			GuestSessionSecret   string `mapstructure:"guest_session_secret"`
 		} `mapstructure:"jwt"`
 		Discord struct {
 			Token string `mapstructure:"token"`
 		} `mapstructure:"discord"`
+		Secret struct {
+			AuthKey          string `mapstructure:"auth_key"`
+			RememberTokenKey string `mapstructure:"remember_token_key"`
+		} `mapstructure:"secret"`
 	} `mapstructure:"app"`
 }
 

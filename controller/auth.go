@@ -65,8 +65,8 @@ func (a *authController) Login(c *fiber.Ctx) error {
 		})
 	}
 
-	accessToken := a.authService.Login(user)
-	if accessToken == nil {
+	loginTokens, err := a.authService.Login(user)
+	if loginTokens == nil || err != nil {
 		return helper.SendResponse(helper.ResponseStruct{
 			Ctx:        c,
 			StatusCode: fiber.StatusUnauthorized,
@@ -99,7 +99,7 @@ func (a *authController) Login(c *fiber.Ctx) error {
 		Ctx:        c,
 		StatusCode: fiber.StatusOK,
 		Message:    "Success",
-		Data:       map[string]interface{}{"access_token": accessToken},
+		Data:       loginTokens,
 	})
 }
 

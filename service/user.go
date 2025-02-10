@@ -42,9 +42,9 @@ func (s *userService) Profile(id string) (data map[string]interface{}, err error
 	}
 
 	data = map[string]interface{}{
-		"username":          user.Username,
-		"email_verified_at": user.EmailVerifiedAt,
-		"phone_verified_at": user.PhoneVerifiedAt,
+		"username":          user.Username.String,
+		"email_verified_at": user.EmailVerifiedAt.Int64,
+		"phone_verified_at": user.PhoneVerifiedAt.Int64,
 		"full_name":         profile.FullName,
 		"nick_name":         profile.NickName,
 	}
