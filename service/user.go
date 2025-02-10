@@ -1,13 +1,14 @@
 package service
 
 import (
+	"github.com/hafiddna/auth-starterkit-be/dto"
 	"github.com/hafiddna/auth-starterkit-be/model"
 	"github.com/hafiddna/auth-starterkit-be/repository"
 )
 
 type UserService interface {
 	FindByEmailPhoneOrUsername(credential string) (user model.User, err error)
-	Profile(id string) (data map[string]interface{}, err error)
+	Profile(id string) (data dto.UserProfileDTO, err error)
 }
 
 type userService struct {
@@ -30,23 +31,23 @@ func (s *userService) FindByEmailPhoneOrUsername(credential string) (user model.
 	return s.userRepository.FindByEmailPhoneOrUsername(credential)
 }
 
-func (s *userService) Profile(id string) (data map[string]interface{}, err error) {
+func (s *userService) Profile(id string) (data dto.UserProfileDTO, err error) {
 	user, err := s.userRepository.FindOneById(id)
 	if err != nil {
-		return nil, err
+		return data, err
 	}
 
 	profile, err := s.userProfile.FindOneByUserID(id)
 	if err != nil {
-		return nil, err
+		return data, err
 	}
 
-	data = map[string]interface{}{
-		"username":          user.Username.String,
-		"email_verified_at": user.EmailVerifiedAt.Int64,
-		"phone_verified_at": user.PhoneVerifiedAt.Int64,
-		"full_name":         profile.FullName,
-		"nick_name":         profile.NickName,
+	data = dto.UserProfileDTO{
+		Username:        user.Username.String,
+		EmailVerifiedAt: user.EmailVerifiedAt.Int64,
+		PhoneVerifiedAt: user.PhoneVerifiedAt.Int64,
+		FullName:        *profile.FullName,
+		NickName:        *profile.NickName,
 	}
 
 	return data, nil

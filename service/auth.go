@@ -12,7 +12,7 @@ import (
 type AuthService interface {
 	ValidateUser(dto dto.LoginDTO) (user model.User, err error)
 	Login(user model.User) (data map[string]interface{}, err error)
-	Profile(id string) (data map[string]interface{}, err error)
+	Profile(id string) (data dto.UserProfileDTO, err error)
 }
 
 type authService struct {
@@ -39,6 +39,7 @@ func (a *authService) ValidateUser(dto dto.LoginDTO) (user model.User, err error
 }
 
 func (a *authService) Login(user model.User) (data map[string]interface{}, err error) {
+	helper.JSONPrettyLog(user)
 	if !user.IsActive {
 		return nil, fmt.Errorf("user is not active")
 	}
@@ -76,9 +77,9 @@ func (a *authService) Login(user model.User) (data map[string]interface{}, err e
 	}, nil
 }
 
-func (a *authService) Profile(id string) (data map[string]interface{}, err error) {
+func (a *authService) Profile(id string) (data dto.UserProfileDTO, err error) {
 	if !helper.IsUUID(id) {
-		return nil, fmt.Errorf("invalid id")
+		return data, fmt.Errorf("invalid id")
 	}
 
 	return a.userService.Profile(id)

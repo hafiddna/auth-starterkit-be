@@ -42,7 +42,6 @@ func AuthMiddleware() fiber.Handler {
 			})
 		}
 
-		// TODO: Do I have to check mapStringClaims["data"]??? Check is there any data key and not nil???
 		var encryptedData helper.EncryptedData
 		tokenData := helper.JSONMarshal(mapStringClaims["data"])
 		helper.JSONUnmarshal([]byte(tokenData), &encryptedData)

@@ -13,6 +13,7 @@ import (
 	uuid2 "github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"io"
+	"log"
 	mathRand "math/rand"
 )
 
@@ -190,4 +191,13 @@ func DecryptAES256CBC(encrypted *EncryptedData, key []byte) (string, error) {
 	}
 
 	return string(plaintext), nil
+}
+
+func JSONPrettyLog(v interface{}) {
+	b, err := json.MarshalIndent(v, "", "  ")
+	if err != nil {
+		log.Println(err)
+	} else {
+		log.Println(string(b))
+	}
 }

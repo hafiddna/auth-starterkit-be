@@ -16,8 +16,8 @@ type User struct {
 	TwoFactorConfirmedAt   sql.NullInt64  `gorm:"type:integer;nullable" json:"two_factor_confirmed_at"`
 	IsActive               bool           `gorm:"type:boolean" json:"is_active"`
 	RememberToken          sql.NullString `gorm:"nullable;select:false" json:"remember_token"`
-	//MembersOf              []Team               `gorm:"many2many:team_user" json:"members_of"`
-	//Teams                  []Team               `gorm:"foreignKey:OwnerID" json:"teams"`
+	MembersOf              []Team         `gorm:"many2many:team_user;joinForeignKey:UserID;joinReferences:TeamID" json:"members_of"`
+	Teams                  []Team         `gorm:"foreignKey:OwnerID" json:"teams"`
 	//Profile                UserProfile          `gorm:"-" json:"profile"`
 	//Setting                UserSetting          `gorm:"-" json:"setting"`
 	Roles []Role `gorm:"many2many:user_role;joinForeignKey:UserID;joinReferences:RoleID" json:"roles"`
