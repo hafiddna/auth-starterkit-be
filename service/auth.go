@@ -107,6 +107,7 @@ func (a *authService) Login(user model.User) (data map[string]interface{}, err e
 
 	rememberTokenDuration := time.Now().Add(time.Hour * 24)
 	rememberData := helper.JwtRememberClaim{
+		// TODO: Add RememberToken to user model
 		//RememberToken: user.RememberToken.String,
 		RememberToken: "",
 	}
