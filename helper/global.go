@@ -14,17 +14,22 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"io"
 	"log"
+	"math/big"
 	mathRand "math/rand"
 )
 
+const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
 func RandomString(length int) string {
-	bytes := make([]byte, length)
-
-	for i := 0; i < length; i++ {
-		bytes[i] = byte(RandomInt(65, 90))
+	result := make([]byte, length)
+	for i := range result {
+		num, err := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
+		if err != nil {
+			return ""
+		}
+		result[i] = charset[num.Int64()]
 	}
-
-	return string(bytes)
+	return string(result)
 }
 
 func RandomInt(min int, max int) int {

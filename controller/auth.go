@@ -9,7 +9,6 @@ import (
 	"github.com/hafiddna/auth-starterkit-be/model"
 	"github.com/hafiddna/auth-starterkit-be/service"
 	"reflect"
-	"time"
 )
 
 type AuthController interface {
@@ -91,8 +90,6 @@ func (a *authController) Login(c *fiber.Ctx) error {
 			Valid:  true,
 		},
 		Payload: "",
-		// TODO: Update last activity shouldn't just be in here
-		LastActivity: time.Now().Unix(),
 	})
 
 	return helper.SendResponse(helper.ResponseStruct{
@@ -117,8 +114,6 @@ func (a *authController) GetProfile(c *fiber.Ctx) error {
 		})
 
 	}
-
-	// TODO: Update session last activity here
 
 	user, err := a.authService.Profile(userId)
 	if err != nil {

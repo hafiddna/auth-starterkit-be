@@ -107,7 +107,8 @@ func (a *authService) Login(user model.User) (data map[string]interface{}, err e
 
 	rememberTokenDuration := time.Now().Add(time.Hour * 24)
 	rememberData := helper.JwtRememberClaim{
-		RememberToken: user.RememberToken.String,
+		//RememberToken: user.RememberToken.String,
+		RememberToken: "",
 	}
 	rememberToken := helper.GenerateRS512Token(config.Config.App.JWT.RememberTokenPrivate, config.Config.App.Secret.RememberTokenKey, user.ID, rememberData, rememberTokenDuration)
 
