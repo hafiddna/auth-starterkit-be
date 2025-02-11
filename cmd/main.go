@@ -32,7 +32,6 @@ func main() {
 
 	// Fiber
 	app := fiber.New(fiber.Config{
-		Prefork:       config.Config.App.Environment == "production",
 		CaseSensitive: true,
 		StrictRouting: true,
 		ServerHeader:  config.Config.App.ServerName,
