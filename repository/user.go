@@ -26,8 +26,14 @@ func NewUserRepository(db *gorm.DB, minio *minio.Client) UserRepository {
 func (r *userRepository) FindByEmailPhoneOrUsername(credential string) (user model.User, err error) {
 	err = r.db.Where("email = ?", credential).Or("phone = ?", credential).Or("username = ?", credential).
 		Preload("Roles", "team_id IS NULL").Preload("Roles.Permissions").
-		Preload("Teams").Preload("Teams.Roles").Preload("Teams.Roles.Permissions").
-		Preload("MembersOf").Preload("MembersOf.Roles").Preload("MembersOf.Roles.Permissions").
+		Preload("Teams", func(db *gorm.DB) *gorm.DB {
+			return db.Joins("JOIN team_user ON team_user.team_id = teams.id").
+				Where("team_user.is_active = ?", true)
+		}).Preload("Teams.Roles").Preload("Teams.Roles.Permissions").
+		Preload("MembersOf", func(db *gorm.DB) *gorm.DB {
+			return db.Joins("JOIN team_user ON team_user.team_id = teams.id").
+				Where("team_user.is_active = ?", true)
+		}).Preload("MembersOf.Roles").Preload("MembersOf.Roles.Permissions").
 		First(&user).Error
 	if err != nil {
 		return user, err
