@@ -12,6 +12,7 @@ type CfgStruct struct {
 			Host string `mapstructure:"host"`
 			Port string `mapstructure:"port"`
 			Cors string `mapstructure:"cors"`
+			URL  string `mapstructure:"url"`
 		} `mapstructure:"server"`
 		Redis struct {
 			Host     string `mapstructure:"host"`

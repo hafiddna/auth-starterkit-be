@@ -15,10 +15,16 @@ type jwtGeneralClaim struct {
 	Data EncryptedData `json:"data"`
 }
 
-type JwtAuthClaim struct {
-	TeamSub     []string `json:"team_sub"`
+type JwtAuthClaimTeamSub struct {
+	Sub         string   `json:"sub"`
 	Roles       []string `json:"roles"`
 	Permissions []string `json:"permissions"`
+}
+
+type JwtAuthClaim struct {
+	TeamSub     []JwtAuthClaimTeamSub `json:"team_sub"`
+	Roles       []string              `json:"roles"`
+	Permissions []string              `json:"permissions"`
 }
 
 type JwtRememberClaim struct {
@@ -46,8 +52,9 @@ func GenerateRS512Token(privateKey, key, userID string, data interface{}, durati
 			NotBefore: jwt.NewNumericDate(time.Now()),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			ID:        uuid.String(),
-			// TODO: What is the meaning of this???
-			//Audience:
+			Audience: jwt.ClaimStrings{
+				config.Config.App.Server.URL,
+			},
 		},
 		Data: EncryptedData{
 			IV:    encryptedData.IV,

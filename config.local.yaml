@@ -8,6 +8,7 @@ app:
     host: "localhost"
     port: "3010"
     cors: "{url},{url}"
+    url: ""
 
   redis:
     host: "localhost"

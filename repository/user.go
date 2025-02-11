@@ -24,7 +24,11 @@ func NewUserRepository(db *gorm.DB, minio *minio.Client) UserRepository {
 }
 
 func (r *userRepository) FindByEmailPhoneOrUsername(credential string) (user model.User, err error) {
-	err = r.db.Where("email = ?", credential).Or("phone = ?", credential).Or("username = ?", credential).Preload("Roles").Preload("Roles.Permissions").Preload("Teams").First(&user).Error
+	err = r.db.Where("email = ?", credential).Or("phone = ?", credential).Or("username = ?", credential).
+		Preload("Roles", "team_id IS NULL").Preload("Roles.Permissions").
+		Preload("Teams").Preload("Teams.Roles").Preload("Teams.Roles.Permissions").
+		Preload("MembersOf").Preload("MembersOf.Roles").Preload("MembersOf.Roles.Permissions").
+		First(&user).Error
 	if err != nil {
 		return user, err
 	}

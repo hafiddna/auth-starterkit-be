@@ -39,27 +39,67 @@ func (a *authService) ValidateUser(dto dto.LoginDTO) (user model.User, err error
 }
 
 func (a *authService) Login(user model.User) (data map[string]interface{}, err error) {
-	helper.JSONPrettyLog(user)
 	if !user.IsActive {
 		return nil, fmt.Errorf("user is not active")
 	}
 
 	roles := make([]string, len(user.Roles))
 	permissions := make([]string, 0)
+	teamSubs := make([]helper.JwtAuthClaimTeamSub, 0)
+	memberOfs := make([]helper.JwtAuthClaimTeamSub, 0)
 	for i, role := range user.Roles {
-		roles[i] = role.Name
+		if role.Name != "" {
+			roles[i] = role.Name
+		}
 		for _, permission := range role.Permissions {
-			if helper.ArrayStringContains(permissions, permission.Name) {
+			if helper.ArrayStringContains(permissions, permission.Name) || permission.Name == "" {
 				continue
 			}
 			permissions = append(permissions, permission.Name)
 		}
 	}
 
+	for i, team := range user.Teams {
+		teamSubs = append(teamSubs, helper.JwtAuthClaimTeamSub{
+			Sub:         team.ID,
+			Roles:       make([]string, len(team.Roles)),
+			Permissions: make([]string, 0),
+		})
+		for j, role := range team.Roles {
+			if role.Name != "" {
+				teamSubs[i].Roles[j] = role.Name
+			}
+			for _, permission := range role.Permissions {
+				if helper.ArrayStringContains(teamSubs[i].Permissions, permission.Name) || permission.Name == "" {
+					continue
+				}
+				teamSubs[i].Permissions = append(teamSubs[i].Permissions, permission.Name)
+			}
+		}
+	}
+
+	for i, membersOf := range user.MembersOf {
+		memberOfs = append(memberOfs, helper.JwtAuthClaimTeamSub{
+			Sub:         membersOf.ID,
+			Roles:       make([]string, len(membersOf.Roles)),
+			Permissions: make([]string, 0),
+		})
+		for j, role := range membersOf.Roles {
+			if role.Name != "" {
+				memberOfs[i].Roles[j] = role.Name
+			}
+			for _, permission := range role.Permissions {
+				if helper.ArrayStringContains(memberOfs[i].Permissions, permission.Name) || permission.Name == "" {
+					continue
+				}
+				memberOfs[i].Permissions = append(memberOfs[i].Permissions, permission.Name)
+			}
+		}
+	}
+
 	authTokenDuration := time.Now().Add(time.Minute * 15)
-	// TODO: Add team_ids to token
 	authData := helper.JwtAuthClaim{
-		TeamSub:     nil,
+		TeamSub:     append(teamSubs, memberOfs...),
 		Roles:       roles,
 		Permissions: permissions,
 	}
