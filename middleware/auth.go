@@ -42,25 +42,6 @@ func AuthMiddleware() fiber.Handler {
 			})
 		}
 
-		var encryptedData helper.EncryptedData
-		tokenData := helper.JSONMarshal(mapStringClaims["data"])
-		helper.JSONUnmarshal([]byte(tokenData), &encryptedData)
-		decryptedData, err := helper.DecryptAES256CBC(&encryptedData, []byte(config.Config.App.Secret.AuthKey))
-		if err != nil {
-			return helper.SendResponse(helper.ResponseStruct{
-				Ctx:        c,
-				StatusCode: fiber.StatusUnauthorized,
-				Message:    "Unauthorized",
-				Error:      err.Error(),
-			})
-		}
-
-		mapDecryptedData := make(map[string]interface{})
-		mapDecryptedData["sub"] = mapStringClaims["sub"]
-		helper.JSONUnmarshal([]byte(decryptedData), &mapDecryptedData)
-
-		c.Locals("user", mapDecryptedData)
-
 		return c.Next()
 	}
 }

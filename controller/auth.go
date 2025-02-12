@@ -6,9 +6,9 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/hafiddna/auth-starterkit-be/dto"
 	"github.com/hafiddna/auth-starterkit-be/helper"
-	"github.com/hafiddna/auth-starterkit-be/model"
 	"github.com/hafiddna/auth-starterkit-be/service"
 	"reflect"
+	"time"
 )
 
 type AuthController interface {
@@ -64,7 +64,36 @@ func (a *authController) Login(c *fiber.Ctx) error {
 		})
 	}
 
-	loginTokens, err := a.authService.Login(user)
+	rememberToken := helper.RandomString(10)
+	sessionData, err := a.sessionService.FindOneByIPAddressAndUserAgent(c.IP(), c.Get("User-Agent"))
+	if err == nil {
+		sessionData.UserID = sql.NullString{
+			String: user.ID,
+			Valid:  true,
+		}
+		sessionData.LastActivity = time.Now().UnixNano() / int64(time.Millisecond)
+		sessionData.RememberToken = sql.NullString{
+			String: rememberToken,
+			Valid:  true,
+		}
+		err = a.sessionService.Update(sessionData)
+		if err != nil {
+			return helper.SendResponse(helper.ResponseStruct{
+				Ctx:        c,
+				StatusCode: fiber.StatusInternalServerError,
+				Message:    "Internal Server Error",
+				Error:      err.Error(),
+			})
+		}
+	} else {
+		return helper.SendResponse(helper.ResponseStruct{
+			Ctx:        c,
+			StatusCode: fiber.StatusNotFound,
+			Message:    "Not Found",
+		})
+	}
+
+	loginTokens, err := a.authService.Login(user, rememberToken)
 	if loginTokens == nil || err != nil {
 		return helper.SendResponse(helper.ResponseStruct{
 			Ctx:        c,
@@ -72,25 +101,6 @@ func (a *authController) Login(c *fiber.Ctx) error {
 			Message:    "Your account is not active",
 		})
 	}
-
-	userAgent := c.Get("User-Agent")
-	userId := user.ID
-	ipAddress := c.IP()
-	go a.sessionService.CreateOrUpdate(model.Session{
-		UserID: sql.NullString{
-			String: userId,
-			Valid:  true,
-		},
-		IPAddress: sql.NullString{
-			String: ipAddress,
-			Valid:  true,
-		},
-		UserAgent: sql.NullString{
-			String: userAgent,
-			Valid:  true,
-		},
-		Payload: "",
-	})
 
 	return helper.SendResponse(helper.ResponseStruct{
 		Ctx:        c,

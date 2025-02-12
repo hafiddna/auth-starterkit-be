@@ -8,6 +8,7 @@ import (
 
 type SessionRepository interface {
 	FindOneByUserIDAndUserAgent(userID, userAgent string) (session model.Session, err error)
+	FindOneByIPAddressAndUserAgent(ipAddress, userAgent string) (session model.Session, err error)
 	Create(session model.Session) error
 	Update(session model.Session) error
 }
@@ -21,7 +22,23 @@ func NewSessionRepository(db *gorm.DB) SessionRepository {
 }
 
 func (r *sessionRepository) FindOneByUserIDAndUserAgent(userID, userAgent string) (session model.Session, err error) {
-	err = model.WithoutTrashed(r.db).Where("user_id = ?", userID).Where("user_agent = ?", userAgent).First(&session).Error
+	err = model.WithoutTrashed(r.db).
+		Where("user_id = ?", userID).
+		Where("user_agent = ?", userAgent).
+		First(&session).Error
+	if err != nil {
+		return session, err
+	}
+
+	return session, nil
+}
+
+func (r *sessionRepository) FindOneByIPAddressAndUserAgent(ipAddress, userAgent string) (session model.Session, err error) {
+	err = model.WithoutTrashed(r.db).
+		Where("ip_address = ?", ipAddress).
+		Where("user_agent = ?", userAgent).
+		Where("user_id IS NULL").
+		First(&session).Error
 	if err != nil {
 		return session, err
 	}
@@ -44,5 +61,6 @@ func (r *sessionRepository) Create(session model.Session) error {
 }
 
 func (r *sessionRepository) Update(session model.Session) error {
-	return session.Updated(r.db, session.UserID.String).Save(session).Error
+	session.Updated(session.UserID.String)
+	return r.db.Save(&session).Error
 }

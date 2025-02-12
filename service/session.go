@@ -1,13 +1,14 @@
 package service
 
 import (
-	"database/sql"
 	"github.com/hafiddna/auth-starterkit-be/model"
 	"github.com/hafiddna/auth-starterkit-be/repository"
 )
 
 type SessionService interface {
-	CreateOrUpdate(session model.Session) error
+	FindOneByIPAddressAndUserAgent(ipAddress, userAgent string) (session model.Session, err error)
+	Create(session model.Session) error
+	Update(session model.Session) error
 }
 
 type sessionService struct {
@@ -20,30 +21,14 @@ func NewSessionService(sessionRepository repository.SessionRepository) SessionSe
 	}
 }
 
-func (s *sessionService) CreateOrUpdate(session model.Session) error {
-	sessionData, err := s.sessionRepository.FindOneByUserIDAndUserAgent(session.UserID.String, session.UserAgent.String)
-	if err != nil || session.UserAgent.String != sessionData.UserAgent.String {
-		return s.sessionRepository.Create(session)
-	} else {
-		return s.sessionRepository.Update(model.Session{
-			Model: model.Model{
-				ID:       sessionData.ID,
-				Metadata: sessionData.Metadata,
-			},
-			UserID: sql.NullString{
-				String: sessionData.UserID.String,
-				Valid:  true,
-			},
-			IPAddress: sql.NullString{
-				String: sessionData.IPAddress.String,
-				Valid:  true,
-			},
-			UserAgent: sql.NullString{
-				String: sessionData.UserAgent.String,
-				Valid:  true,
-			},
-			Payload:      "",
-			LastActivity: session.LastActivity,
-		})
-	}
+func (s *sessionService) FindOneByIPAddressAndUserAgent(ipAddress, userAgent string) (session model.Session, err error) {
+	return s.sessionRepository.FindOneByIPAddressAndUserAgent(ipAddress, userAgent)
+}
+
+func (s *sessionService) Create(session model.Session) error {
+	return s.sessionRepository.Create(session)
+}
+
+func (s *sessionService) Update(session model.Session) error {
+	return s.sessionRepository.Update(session)
 }

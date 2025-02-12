@@ -11,7 +11,7 @@ import (
 
 type AuthService interface {
 	ValidateUser(dto dto.LoginDTO) (user model.User, err error)
-	Login(user model.User) (data map[string]interface{}, err error)
+	Login(user model.User, rememberToken string) (data map[string]interface{}, err error)
 	Profile(id string) (data dto.UserProfileDTO, err error)
 }
 
@@ -38,7 +38,7 @@ func (a *authService) ValidateUser(dto dto.LoginDTO) (user model.User, err error
 	return user, fmt.Errorf("invalid password")
 }
 
-func (a *authService) Login(user model.User) (data map[string]interface{}, err error) {
+func (a *authService) Login(user model.User, rememberToken string) (data map[string]interface{}, err error) {
 	if !user.IsActive {
 		return nil, fmt.Errorf("user is not active")
 	}
@@ -107,15 +107,13 @@ func (a *authService) Login(user model.User) (data map[string]interface{}, err e
 
 	rememberTokenDuration := time.Now().Add(time.Hour * 24)
 	rememberData := helper.JwtRememberClaim{
-		// TODO: Add RememberToken to user model
-		//RememberToken: user.RememberToken.String,
-		RememberToken: "",
+		RememberToken: rememberToken,
 	}
-	rememberToken := helper.GenerateRS512Token(config.Config.App.JWT.RememberTokenPrivate, config.Config.App.Secret.RememberTokenKey, user.ID, rememberData, rememberTokenDuration)
+	rememberAccessToken := helper.GenerateRS512Token(config.Config.App.JWT.RememberTokenPrivate, config.Config.App.Secret.RememberTokenKey, user.ID, rememberData, rememberTokenDuration)
 
 	return map[string]interface{}{
 		"access_token":  authToken,
-		"refresh_token": rememberToken,
+		"refresh_token": rememberAccessToken,
 	}, nil
 }
 

@@ -1,6 +1,8 @@
 package model
 
 import (
+	"encoding/json"
+	"github.com/hafiddna/auth-starterkit-be/helper"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 	"strconv"
@@ -14,6 +16,9 @@ type Model struct {
 
 func (m *Model) Created(userID string) {
 	timestamp := time.Now().UnixNano() / int64(time.Millisecond)
+	if userID == "" {
+		userID = "system"
+	}
 	m.Metadata = []byte(`{
 		"created_by": "` + userID + `",
 		"created_at": ` + strconv.FormatInt(timestamp, 10) + `,
@@ -24,14 +29,50 @@ func (m *Model) Created(userID string) {
 	}`)
 }
 
-func (m *Model) Updated(db *gorm.DB, userID string) *gorm.DB {
+func (m *Model) Updated(userID string) {
 	timestamp := time.Now().UnixNano() / int64(time.Millisecond)
-	return db.UpdateColumn("metadata", datatypes.JSONSet("metadata").Set("updated_by", userID).Set("updated_at", timestamp))
+	if userID == "" {
+		userID = "system"
+	}
+
+	var metadata map[string]interface{}
+	err := helper.JSONUnmarshal(m.Metadata, &metadata)
+	if err != nil {
+		metadata = map[string]interface{}{}
+	}
+
+	metadata["updated_by"] = userID
+	metadata["updated_at"] = timestamp
+
+	updatedMetadata, err := json.Marshal(metadata)
+	if err != nil {
+		updatedMetadata = m.Metadata
+	}
+
+	m.Metadata = updatedMetadata
 }
 
-func (m *Model) SoftDelete(db *gorm.DB, userID string) *gorm.DB {
+func (m *Model) SoftDelete(userID string) {
 	timestamp := time.Now().UnixNano() / int64(time.Millisecond)
-	return db.UpdateColumn("metadata", datatypes.JSONSet("metadata").Set("deleted_by", userID).Set("deleted_at", timestamp))
+	if userID == "" {
+		userID = "system"
+	}
+
+	var metadata map[string]interface{}
+	err := helper.JSONUnmarshal(m.Metadata, &metadata)
+	if err != nil {
+		metadata = map[string]interface{}{}
+	}
+
+	metadata["deleted_by"] = userID
+	metadata["deleted_at"] = timestamp
+
+	updatedMetadata, err := json.Marshal(metadata)
+	if err != nil {
+		updatedMetadata = m.Metadata
+	}
+
+	m.Metadata = updatedMetadata
 }
 
 func OnlyTrashed(db *gorm.DB) *gorm.DB {

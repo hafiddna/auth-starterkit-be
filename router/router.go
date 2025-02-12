@@ -102,11 +102,11 @@ func SetupRoutes(app *fiber.App) {
 		//DisableColors: true,
 		//Output: file,
 	}))
-	app.Use(middleware.ActivityMiddleware())
 
 	// Repository
-	roleUserRepository := repository.NewRoleUserRepository(postgres)
 	sessionRepository := repository.NewSessionRepository(postgres)
+	app.Use(middleware.ActivityMiddleware(sessionRepository))
+	roleUserRepository := repository.NewRoleUserRepository(postgres)
 	userProfileRepository := repository.NewUserProfileRepository(mongo)
 	userRepository := repository.NewUserRepository(postgres, minio)
 	userSettingRepository := repository.NewUserSettingRepository(mongo)
