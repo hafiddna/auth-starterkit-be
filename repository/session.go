@@ -7,8 +7,7 @@ import (
 )
 
 type SessionRepository interface {
-	FindOneByUserIDAndUserAgent(userID, userAgent string) (session model.Session, err error)
-	FindOneByIPAddressAndUserAgent(ipAddress, userAgent string) (session model.Session, err error)
+	FindOneByAppID(appID string) (session model.Session, err error)
 	Create(session model.Session) error
 	Update(session model.Session) error
 }
@@ -21,23 +20,9 @@ func NewSessionRepository(db *gorm.DB) SessionRepository {
 	return &sessionRepository{db: db}
 }
 
-func (r *sessionRepository) FindOneByUserIDAndUserAgent(userID, userAgent string) (session model.Session, err error) {
+func (r *sessionRepository) FindOneByAppID(appID string) (session model.Session, err error) {
 	err = model.WithoutTrashed(r.db).
-		Where("user_id = ?", userID).
-		Where("user_agent = ?", userAgent).
-		First(&session).Error
-	if err != nil {
-		return session, err
-	}
-
-	return session, nil
-}
-
-func (r *sessionRepository) FindOneByIPAddressAndUserAgent(ipAddress, userAgent string) (session model.Session, err error) {
-	err = model.WithoutTrashed(r.db).
-		Where("ip_address = ?", ipAddress).
-		Where("user_agent = ?", userAgent).
-		Where("user_id IS NULL").
+		Where("app_id = ?", appID).
 		First(&session).Error
 	if err != nil {
 		return session, err

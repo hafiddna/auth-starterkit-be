@@ -10,6 +10,7 @@ type Session struct {
 	UserAgent     sql.NullString `gorm:"type:text" json:"user_agent"`
 	Payload       string         `gorm:"type:text" json:"payload"`
 	LastActivity  int64          `gorm:"type:integer;index" json:"last_activity"`
+	AppID         string         `gorm:"type:varchar(255);uniqueIndex" json:"app_id"`
 	RememberToken sql.NullString `gorm:"nullable;select:false" json:"remember_token"`
 }
 

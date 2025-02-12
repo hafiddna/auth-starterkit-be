@@ -18,6 +18,16 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 		authorization := c.Get("Authorization")
 		userAgent := c.Get("User-Agent")
 		ipAddress := c.IP()
+		appID := c.GetReqHeaders()["X-App-Id"]
+
+		if len(appID) == 0 {
+			return helper.SendResponse(helper.ResponseStruct{
+				Ctx:        c,
+				StatusCode: fiber.StatusBadRequest,
+				Message:    "Bad Request",
+				Error:      "X-App-ID is required",
+			})
+		}
 
 		if authorization == "" || len(authorization) < 7 {
 			session := model.Session{
@@ -31,8 +41,9 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 				},
 				Payload:      sessionPayload,
 				LastActivity: time.Now().UnixNano() / int64(time.Millisecond),
+				AppID:        appID[0],
 			}
-			sessionData, err := repository.FindOneByIPAddressAndUserAgent(ipAddress, userAgent)
+			sessionData, err := repository.FindOneByAppID(appID[0])
 			if err != nil {
 				err := repository.Create(session)
 				if err != nil {
@@ -61,6 +72,7 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 						String: "",
 						Valid:  false,
 					},
+					AppID: sessionData.AppID,
 				})
 				if err != nil {
 					return helper.SendResponse(helper.ResponseStruct{
@@ -115,9 +127,7 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 
 			c.Locals("user", mapDecryptedData)
 
-			userId := mapDecryptedData["sub"].(string)
-
-			sessionData, err := repository.FindOneByUserIDAndUserAgent(userId, userAgent)
+			sessionData, err := repository.FindOneByAppID(appID[0])
 			if err == nil {
 				err := repository.Update(model.Session{
 					Model: model.Model{
@@ -133,6 +143,7 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 					Payload:       sessionPayload,
 					LastActivity:  time.Now().UnixNano() / int64(time.Millisecond),
 					RememberToken: sessionData.RememberToken,
+					AppID:         sessionData.AppID,
 				})
 
 				if err != nil {
@@ -153,6 +164,7 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 			}
 		}
 
+		c.Locals("app_id", appID[0])
 		return c.Next()
 	}
 }
