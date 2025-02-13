@@ -105,7 +105,6 @@ func SetupRoutes(app *fiber.App) {
 
 	// Repository
 	sessionRepository := repository.NewSessionRepository(postgres)
-	app.Use(middleware.ActivityMiddleware(sessionRepository))
 	roleUserRepository := repository.NewRoleUserRepository(postgres)
 	userProfileRepository := repository.NewUserProfileRepository(mongo)
 	userRepository := repository.NewUserRepository(postgres, minio)
@@ -118,6 +117,9 @@ func SetupRoutes(app *fiber.App) {
 
 	// Controller
 	authController := controller.NewAuthController(authService, sessionService, validator)
+
+	// More Middleware
+	app.Use(middleware.ActivityMiddleware(sessionRepository))
 
 	// Routes
 	// Start::Public Routes
