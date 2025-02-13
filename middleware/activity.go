@@ -19,6 +19,7 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 		userAgent := c.Get("User-Agent")
 		ipAddress := c.IP()
 		appID := c.GetReqHeaders()["X-App-Id"]
+		rememberToken := helper.RandomString(10)
 
 		if len(appID) == 0 {
 			return helper.SendResponse(helper.ResponseStruct{
@@ -42,6 +43,10 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 				Payload:      sessionPayload,
 				LastActivity: time.Now().UnixNano() / int64(time.Millisecond),
 				AppID:        appID[0],
+				RememberToken: sql.NullString{
+					String: rememberToken,
+					Valid:  true,
+				},
 			}
 			sessionData, err := repository.FindOneByAppID(appID[0])
 			if err != nil {
@@ -64,15 +69,12 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 						String: "",
 						Valid:  false,
 					},
-					IPAddress:    session.IPAddress,
-					UserAgent:    session.UserAgent,
-					Payload:      sessionPayload,
-					LastActivity: time.Now().UnixNano() / int64(time.Millisecond),
-					RememberToken: sql.NullString{
-						String: "",
-						Valid:  false,
-					},
-					AppID: sessionData.AppID,
+					IPAddress:     session.IPAddress,
+					UserAgent:     session.UserAgent,
+					Payload:       sessionPayload,
+					LastActivity:  time.Now().UnixNano() / int64(time.Millisecond),
+					RememberToken: sessionData.RememberToken,
+					AppID:         sessionData.AppID,
 				})
 				if err != nil {
 					return helper.SendResponse(helper.ResponseStruct{

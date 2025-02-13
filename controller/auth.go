@@ -65,7 +65,6 @@ func (a *authController) Login(c *fiber.Ctx) error {
 	}
 
 	appID := c.Locals("app_id").(string)
-	rememberToken := helper.RandomString(10)
 	sessionData, err := a.sessionService.FindOneByAppID(appID)
 	if err == nil {
 		sessionData.UserID = sql.NullString{
@@ -73,10 +72,6 @@ func (a *authController) Login(c *fiber.Ctx) error {
 			Valid:  true,
 		}
 		sessionData.LastActivity = time.Now().UnixNano() / int64(time.Millisecond)
-		sessionData.RememberToken = sql.NullString{
-			String: rememberToken,
-			Valid:  true,
-		}
 		err = a.sessionService.Update(sessionData)
 		if err != nil {
 			return helper.SendResponse(helper.ResponseStruct{
@@ -94,7 +89,7 @@ func (a *authController) Login(c *fiber.Ctx) error {
 		})
 	}
 
-	loginTokens, err := a.authService.Login(user, rememberToken)
+	loginTokens, err := a.authService.Login(user, sessionData.RememberToken.String)
 	if loginTokens == nil || err != nil {
 		return helper.SendResponse(helper.ResponseStruct{
 			Ctx:        c,

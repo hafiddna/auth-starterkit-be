@@ -110,11 +110,50 @@ func ValidateRS512Token(publicKey, token string) (*jwt.Token, error) {
 	return parsedToken, nil
 }
 
-func GenerateHS512Token(secret, userID string, data interface{}) string {
-	return ""
+func GenerateHS256Token(secret, key, userID string, data interface{}, duration time.Time) string {
+	uuid := uuid2.New()
+
+	var claims jwt.Claims
+	var err error
+
+	marshalledData := JSONMarshal(data)
+
+	encryptedData, err := EncryptAES256CBC([]byte(marshalledData), []byte(key))
+	if err != nil {
+		log.Fatalf("Error encrypting data: %v", err)
+	}
+
+	claims = &jwtGeneralClaim{
+		RegisteredClaims: jwt.RegisteredClaims{
+			Issuer:    config.Config.App.ServerName,
+			Subject:   userID,
+			ExpiresAt: jwt.NewNumericDate(duration),
+			NotBefore: jwt.NewNumericDate(time.Now()),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			ID:        uuid.String(),
+			Audience: jwt.ClaimStrings{
+				config.Config.App.Server.URL,
+			},
+		},
+		Data: EncryptedData{
+			IV:    encryptedData.IV,
+			Value: encryptedData.Value,
+			MAC:   encryptedData.MAC,
+			Tag:   encryptedData.Tag,
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	t, err := token.SignedString([]byte(secret))
+
+	if err != nil {
+		return ""
+	}
+
+	return t
 }
 
-func ValidateHS512Token(token, secret string) (*jwt.Token, error) {
+func ValidateHS256Token(secret, token string) (*jwt.Token, error) {
 	parsedToken, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, jwt.ErrInvalidKeyType
