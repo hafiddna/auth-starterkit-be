@@ -33,6 +33,7 @@ func NewAuthController(authService service.AuthService, sessionService service.S
 }
 
 func (a *authController) Login(c *fiber.Ctx) error {
+	// TODO: Differentiate between login web and login mobile
 	var loginDto dto.LoginDTO
 	if err := c.BodyParser(&loginDto); err != nil {
 		return helper.SendResponse(helper.ResponseStruct{
@@ -55,6 +56,7 @@ func (a *authController) Login(c *fiber.Ctx) error {
 		})
 	}
 
+	// TODO: When the access_token and refresh_token isn't expired, return the tokens, don't create new tokens
 	user, err := a.authService.ValidateUser(loginDto)
 	if err != nil {
 		return helper.SendResponse(helper.ResponseStruct{
@@ -107,6 +109,28 @@ func (a *authController) Login(c *fiber.Ctx) error {
 }
 
 func (a *authController) Refresh(c *fiber.Ctx) error {
+	var refreshDTO dto.RefreshDTO
+	if err := c.BodyParser(&refreshDTO); err != nil {
+		return helper.SendResponse(helper.ResponseStruct{
+			Ctx:        c,
+			StatusCode: fiber.StatusBadRequest,
+			Message:    "Bad Request",
+			Error:      err.Error(),
+		})
+	}
+
+	if err := a.validator.Struct(refreshDTO); err != nil {
+		body := reflect.TypeOf(refreshDTO)
+		errorMessages := helper.Validate(body, err)
+
+		return helper.SendResponse(helper.ResponseStruct{
+			Ctx:        c,
+			StatusCode: fiber.StatusBadRequest,
+			Message:    "Bad Request",
+			Error:      errorMessages,
+		})
+	}
+
 	return nil
 }
 
