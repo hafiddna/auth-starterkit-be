@@ -64,7 +64,7 @@ func (a *authController) Login(c *fiber.Ctx) error {
 		})
 	}
 
-	appID := c.Locals("app_id").(string)
+	appID := c.Get("X-App-Id")
 	sessionData, err := a.sessionService.FindOneByAppID(appID)
 	if err == nil {
 		sessionData.UserID = sql.NullString{

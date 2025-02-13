@@ -24,6 +24,15 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 		deviceType := c.Get("X-Device-Type")
 		rememberToken := helper.RandomString(10)
 
+		if len(userAgent) == 0 {
+			return helper.SendResponse(helper.ResponseStruct{
+				Ctx:        c,
+				StatusCode: fiber.StatusBadRequest,
+				Message:    "Bad Request",
+				Error:      "User-Agent is required",
+			})
+		}
+
 		if len(appID) == 0 {
 			return helper.SendResponse(helper.ResponseStruct{
 				Ctx:        c,
@@ -193,7 +202,6 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 			}
 		}
 
-		c.Locals("app_id", appID)
 		return c.Next()
 	}
 }
