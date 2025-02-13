@@ -127,8 +127,8 @@ func SetupRoutes(app *fiber.App) {
 
 	// Auth
 	//public.Post("/register", authController.Register)
-	public.Post("/login", authController.Login)    // TODO: Check
-	public.Get("/refresh", authController.Refresh) // TODO: Check
+	public.Post("/login", authController.Login)           // TODO: Check
+	public.Post("/refresh-token", authController.Refresh) // TODO: Check
 	//public.Post("/forgot-password", authController.ForgotPassword)
 	//public.Patch("/reset-password", authController.ResetPassword)
 	// End::Public Routes

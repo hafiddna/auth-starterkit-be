@@ -19,7 +19,9 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 		authorization := c.Get("Authorization")
 		userAgent := c.Get("User-Agent")
 		ipAddress := c.IP()
-		appID := c.GetReqHeaders()["X-App-Id"]
+		appID := c.Get("X-App-Id")
+		deviceCategory := c.Get("X-Device-Category")
+		deviceType := c.Get("X-Device-Type")
 		rememberToken := helper.RandomString(10)
 
 		if len(appID) == 0 {
@@ -28,6 +30,24 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 				StatusCode: fiber.StatusBadRequest,
 				Message:    "Bad Request",
 				Error:      "X-App-ID is required",
+			})
+		}
+
+		if len(deviceCategory) == 0 {
+			return helper.SendResponse(helper.ResponseStruct{
+				Ctx:        c,
+				StatusCode: fiber.StatusBadRequest,
+				Message:    "Bad Request",
+				Error:      "X-Device-Category is required, please provide either 'Web', 'Mobile', 'Desktop App', 'Smart Devices', 'Game Consoles', 'Bots and Automation', 'Virtual or Cloud', or 'Others'",
+			})
+		}
+
+		if len(deviceType) == 0 {
+			return helper.SendResponse(helper.ResponseStruct{
+				Ctx:        c,
+				StatusCode: fiber.StatusBadRequest,
+				Message:    "Bad Request",
+				Error:      "X-Device-Type is required",
 			})
 		}
 
@@ -41,15 +61,17 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 					String: userAgent,
 					Valid:  true,
 				},
-				Payload:      sessionPayload.SessionEncode(),
-				LastActivity: time.Now().UnixNano() / int64(time.Millisecond),
-				AppID:        appID[0],
+				Payload:        sessionPayload.SessionEncode(),
+				LastActivity:   time.Now().UnixNano() / int64(time.Millisecond),
+				AppID:          appID,
+				DeviceCategory: deviceCategory,
+				DeviceType:     deviceType,
 				RememberToken: sql.NullString{
 					String: rememberToken,
 					Valid:  true,
 				},
 			}
-			sessionData, err := repository.FindOneByAppID(appID[0])
+			sessionData, err := repository.FindOneByAppID(appID)
 			if err != nil {
 				err := repository.Create(session)
 				if err != nil {
@@ -70,12 +92,14 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 						String: "",
 						Valid:  false,
 					},
-					IPAddress:     session.IPAddress,
-					UserAgent:     session.UserAgent,
-					Payload:       sessionPayload.SessionEncode(),
-					LastActivity:  time.Now().UnixNano() / int64(time.Millisecond),
-					RememberToken: sessionData.RememberToken,
-					AppID:         sessionData.AppID,
+					IPAddress:      session.IPAddress,
+					UserAgent:      session.UserAgent,
+					Payload:        sessionPayload.SessionEncode(),
+					LastActivity:   time.Now().UnixNano() / int64(time.Millisecond),
+					RememberToken:  sessionData.RememberToken,
+					AppID:          sessionData.AppID,
+					DeviceCategory: deviceCategory,
+					DeviceType:     deviceType,
 				})
 				if err != nil {
 					return helper.SendResponse(helper.ResponseStruct{
@@ -130,7 +154,7 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 
 			c.Locals("user", mapDecryptedData)
 
-			sessionData, err := repository.FindOneByAppID(appID[0])
+			sessionData, err := repository.FindOneByAppID(appID)
 			if err == nil {
 				err := repository.Update(model.Session{
 					Model: model.Model{
@@ -142,11 +166,13 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 						String: ipAddress,
 						Valid:  true,
 					},
-					UserAgent:     sessionData.UserAgent,
-					Payload:       sessionPayload.SessionEncode(),
-					LastActivity:  time.Now().UnixNano() / int64(time.Millisecond),
-					RememberToken: sessionData.RememberToken,
-					AppID:         sessionData.AppID,
+					UserAgent:      sessionData.UserAgent,
+					Payload:        sessionPayload.SessionEncode(),
+					LastActivity:   time.Now().UnixNano() / int64(time.Millisecond),
+					RememberToken:  sessionData.RememberToken,
+					AppID:          sessionData.AppID,
+					DeviceCategory: deviceCategory,
+					DeviceType:     deviceType,
 				})
 
 				if err != nil {
@@ -167,7 +193,7 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 			}
 		}
 
-		c.Locals("app_id", appID[0])
+		c.Locals("app_id", appID)
 		return c.Next()
 	}
 }
