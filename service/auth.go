@@ -11,7 +11,7 @@ import (
 
 type AuthService interface {
 	ValidateUser(dto dto.LoginDTO) (user model.User, err error)
-	Login(user model.User, rememberToken string) (data map[string]interface{}, err error)
+	Login(user model.User, isRemembered bool, rememberToken string) (data map[string]interface{}, err error)
 	Profile(id string) (data dto.UserProfileDTO, err error)
 }
 
@@ -38,7 +38,8 @@ func (a *authService) ValidateUser(dto dto.LoginDTO) (user model.User, err error
 	return user, fmt.Errorf("invalid password")
 }
 
-func (a *authService) Login(user model.User, rememberToken string) (data map[string]interface{}, err error) {
+func (a *authService) Login(user model.User, isRemembered bool, rememberToken string) (data map[string]interface{}, err error) {
+	data = make(map[string]interface{})
 	if !user.IsActive {
 		return nil, fmt.Errorf("user is not active")
 	}
@@ -104,17 +105,18 @@ func (a *authService) Login(user model.User, rememberToken string) (data map[str
 		Permissions: permissions,
 	}
 	authToken := helper.GenerateRS512Token(config.Config.App.JWT.PrivateKey, config.Config.App.Secret.AuthKey, user.ID, authData, authTokenDuration)
+	data["access_token"] = authToken
 
-	rememberTokenDuration := time.Now().Add(time.Hour * 24)
-	rememberData := helper.JwtRememberClaim{
-		RememberToken: rememberToken,
+	if isRemembered {
+		rememberTokenDuration := time.Now().Add(time.Hour * 24)
+		rememberData := helper.JwtRememberClaim{
+			RememberToken: rememberToken,
+		}
+		rememberAccessToken := helper.GenerateRS512Token(config.Config.App.JWT.RememberTokenPrivate, config.Config.App.Secret.RememberTokenKey, user.ID, rememberData, rememberTokenDuration)
+		data["refresh_token"] = rememberAccessToken
 	}
-	rememberAccessToken := helper.GenerateRS512Token(config.Config.App.JWT.RememberTokenPrivate, config.Config.App.Secret.RememberTokenKey, user.ID, rememberData, rememberTokenDuration)
 
-	return map[string]interface{}{
-		"access_token":  authToken,
-		"refresh_token": rememberAccessToken,
-	}, nil
+	return data, nil
 }
 
 func (a *authService) Profile(id string) (data dto.UserProfileDTO, err error) {

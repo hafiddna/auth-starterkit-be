@@ -89,7 +89,7 @@ func (a *authController) Login(c *fiber.Ctx) error {
 		})
 	}
 
-	loginTokens, err := a.authService.Login(user, sessionData.RememberToken.String)
+	loginTokens, err := a.authService.Login(user, *loginDto.Remember, sessionData.RememberToken.String)
 	if loginTokens == nil || err != nil {
 		return helper.SendResponse(helper.ResponseStruct{
 			Ctx:        c,
