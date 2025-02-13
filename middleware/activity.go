@@ -13,8 +13,9 @@ import (
 
 func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		// TODO: Fill this variable with the session payload
-		var sessionPayload string
+		var sessionPayload model.SessionPayload
+		sessionPayload.Previous.URL = c.Get("Referer")
+
 		authorization := c.Get("Authorization")
 		userAgent := c.Get("User-Agent")
 		ipAddress := c.IP()
@@ -40,7 +41,7 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 					String: userAgent,
 					Valid:  true,
 				},
-				Payload:      sessionPayload,
+				Payload:      sessionPayload.SessionEncode(),
 				LastActivity: time.Now().UnixNano() / int64(time.Millisecond),
 				AppID:        appID[0],
 				RememberToken: sql.NullString{
@@ -71,7 +72,7 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 					},
 					IPAddress:     session.IPAddress,
 					UserAgent:     session.UserAgent,
-					Payload:       sessionPayload,
+					Payload:       sessionPayload.SessionEncode(),
 					LastActivity:  time.Now().UnixNano() / int64(time.Millisecond),
 					RememberToken: sessionData.RememberToken,
 					AppID:         sessionData.AppID,
@@ -142,7 +143,7 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 						Valid:  true,
 					},
 					UserAgent:     sessionData.UserAgent,
-					Payload:       sessionPayload,
+					Payload:       sessionPayload.SessionEncode(),
 					LastActivity:  time.Now().UnixNano() / int64(time.Millisecond),
 					RememberToken: sessionData.RememberToken,
 					AppID:         sessionData.AppID,

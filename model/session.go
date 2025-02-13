@@ -1,6 +1,47 @@
 package model
 
-import "database/sql"
+import (
+	"database/sql"
+	"encoding/base64"
+	"fmt"
+	"github.com/hafiddna/auth-starterkit-be/helper"
+	"github.com/yvasiyarov/php_session_decoder/php_serialize"
+)
+
+type PreviousPayload struct {
+	URL string `json:"url"`
+}
+
+type SessionPayload struct {
+	Previous PreviousPayload `json:"_previous"`
+}
+
+func (s *SessionPayload) SessionEncode() (data string) {
+	json := helper.JSONMarshal(s)
+	encoded, _ := php_serialize.Serialize(json)
+	return base64.StdEncoding.EncodeToString([]byte(encoded))
+}
+
+func (s *SessionPayload) SessionDecode(payload string) (err error) {
+	decoded, err := base64.StdEncoding.DecodeString(payload)
+	if err != nil {
+		return err
+	}
+
+	serialized, err := php_serialize.UnSerialize(string(decoded))
+	if err != nil {
+		return err
+	}
+
+	stringSerialized, isString := serialized.(string)
+	if !isString {
+		return fmt.Errorf("Session data is not a string")
+	}
+
+	err = helper.JSONUnmarshal([]byte(stringSerialized), s)
+
+	return nil
+}
 
 type Session struct {
 	Model
