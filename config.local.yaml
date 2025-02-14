@@ -48,3 +48,6 @@ app:
     auth_key: ""
     remember_token_key: ""
     data_encryption_key: ""
+
+  auth_config:
+    is_team_enabled: false

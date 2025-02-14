@@ -100,9 +100,13 @@ func (a *authService) Login(user model.User, isRemembered bool, rememberToken st
 
 	authTokenDuration := time.Now().Add(time.Minute * 15)
 	authData := helper.JwtAuthClaim{
-		TeamSub:     append(teamSubs, memberOfs...),
 		Roles:       roles,
 		Permissions: permissions,
+	}
+	if config.Config.App.AuthConfig.IsTeamEnabled {
+		authData.TeamSub = append(authData.TeamSub, teamSubs...)
+	} else {
+		authData.TeamSub = []helper.JwtAuthClaimTeamSub{}
 	}
 	authToken := helper.GenerateRS512Token(config.Config.App.JWT.PrivateKey, config.Config.App.Secret.AuthKey, user.ID, authData, authTokenDuration)
 	data["access_token"] = authToken

@@ -1,6 +1,8 @@
 package config
 
-import "github.com/spf13/viper"
+import (
+	"github.com/spf13/viper"
+)
 
 type CfgStruct struct {
 	App struct {
@@ -53,6 +55,9 @@ type CfgStruct struct {
 			RememberTokenKey  string `mapstructure:"remember_token_key"`
 			DataEncryptionKey string `mapstructure:"data_encryption_key"`
 		} `mapstructure:"secret"`
+		AuthConfig struct {
+			IsTeamEnabled bool `mapstructure:"is_team_enabled"`
+		} `mapstructure:"auth_config"`
 	} `mapstructure:"app"`
 }
 

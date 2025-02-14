@@ -48,6 +48,9 @@ func (s *userService) Profile(id string) (data dto.UserProfileDTO, err error) {
 		PhoneVerifiedAt: user.PhoneVerifiedAt.Int64,
 		FullName:        *profile.FullName,
 		NickName:        *profile.NickName,
+		// TODO: Fill this data
+		//Avatar:          "",
+		//Teams:           nil,
 	}
 
 	return data, nil
