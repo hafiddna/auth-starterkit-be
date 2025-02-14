@@ -40,7 +40,6 @@ app:
     private: ""
     remember_token_public: ""
     remember_token_private: ""
-    guest_session_secret: ""
 
   discord:
     token: "{token}"

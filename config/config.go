@@ -44,7 +44,6 @@ type CfgStruct struct {
 			PrivateKey           string `mapstructure:"private"`
 			RememberTokenPublic  string `mapstructure:"remember_token_public"`
 			RememberTokenPrivate string `mapstructure:"remember_token_private"`
-			GuestSessionSecret   string `mapstructure:"guest_session_secret"`
 		} `mapstructure:"jwt"`
 		Discord struct {
 			Token string `mapstructure:"token"`
