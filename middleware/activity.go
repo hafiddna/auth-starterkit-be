@@ -19,13 +19,8 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 		sessionPayload.Previous.URL = c.Get("Referer")
 
 		authorization := c.Get("Authorization")
-		userAgent := c.Get("User-Agent")
 		ipAddress := c.IP()
-		appID := c.Get("X-App-Id")
-		deviceCategory := c.Get("X-Device-Category")
-		deviceType := c.Get("X-Device-Type")
-		rememberToken := helper.RandomString(10)
-
+		userAgent := c.Get("User-Agent")
 		if len(userAgent) == 0 {
 			return helper.SendResponse(helper.ResponseStruct{
 				Ctx:        c,
@@ -35,6 +30,7 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 			})
 		}
 
+		appID := c.Get("X-App-Id")
 		if len(appID) == 0 {
 			return helper.SendResponse(helper.ResponseStruct{
 				Ctx:        c,
@@ -44,6 +40,7 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 			})
 		}
 
+		deviceCategory := c.Get("X-Device-Category")
 		if len(deviceCategory) == 0 {
 			return helper.SendResponse(helper.ResponseStruct{
 				Ctx:        c,
@@ -53,6 +50,7 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 			})
 		}
 
+		deviceType := c.Get("X-Device-Type")
 		if len(deviceType) == 0 {
 			return helper.SendResponse(helper.ResponseStruct{
 				Ctx:        c,
@@ -77,13 +75,13 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 				AppID:          appID,
 				DeviceCategory: deviceCategory,
 				DeviceType:     deviceType,
-				RememberToken: sql.NullString{
-					String: rememberToken,
-					Valid:  true,
-				},
 			}
 			sessionData, err := repository.FindOneByAppID(appID)
 			if err != nil {
+				session.RememberToken = sql.NullString{
+					String: helper.RandomString(10),
+					Valid:  true,
+				}
 				err := repository.Create(session)
 				if err != nil {
 					return helper.SendResponse(helper.ResponseStruct{
