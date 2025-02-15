@@ -10,8 +10,8 @@ import (
 
 type Session struct {
 	Model
-	UserID sql.NullString `gorm:"type:uuid;index;null" json:"user_id"`
-	//User         User           `gorm:"foreignKey:UserID" json:"user,omitempty"`
+	UserID         sql.NullString `gorm:"type:uuid;index;null" json:"user_id"`
+	User           User           `gorm:"foreignKey:UserID" json:"user,omitempty"`
 	IPAddress      sql.NullString `gorm:"type:varchar(45)" json:"ip_address"`
 	UserAgent      sql.NullString `gorm:"type:text" json:"user_agent"`
 	Payload        string         `gorm:"type:text" json:"payload"`

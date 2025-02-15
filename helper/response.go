@@ -18,9 +18,9 @@ type ResponseStruct struct {
 type BaseResponse struct {
 	XMLName    xml.Name    `json:"-" xml:"response"`
 	StatusCode int         `json:"status_code" xml:"status_code"`
-	Message    string      `json:"message,omitempty" xml:"message"`
-	Error      interface{} `json:"error,omitempty" xml:"error"`
-	Data       interface{} `json:"data,omitempty" xml:"data"`
+	Message    string      `json:"message" xml:"message"`
+	Error      interface{} `json:"error" xml:"error"`
+	Data       interface{} `json:"data" xml:"data"`
 }
 
 func SendResponse(baseResponse ResponseStruct) (err error) {
@@ -47,6 +47,8 @@ func SendResponse(baseResponse ResponseStruct) (err error) {
 				log.Fatalf("Error encrypting data: %v", err)
 			}
 		}
+	} else {
+		newBaseResponse.Data = nil
 	}
 
 	accept := baseResponse.Ctx.Get("Accept")

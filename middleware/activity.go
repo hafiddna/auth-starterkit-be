@@ -21,6 +21,7 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 		authorization := c.Get("Authorization")
 		ipAddress := c.IP()
 		userAgent := c.Get("User-Agent")
+		// TODO: How to check a valid User-Agent?
 		if len(userAgent) == 0 {
 			return helper.SendResponse(helper.ResponseStruct{
 				Ctx:        c,
@@ -38,8 +39,16 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 				Message:    "Bad Request",
 				Error:      "X-App-ID is required",
 			})
+		} else if !helper.IsUUID(appID) {
+			return helper.SendResponse(helper.ResponseStruct{
+				Ctx:        c,
+				StatusCode: fiber.StatusBadRequest,
+				Message:    "Bad Request",
+				Error:      "X-App-ID is not a valid",
+			})
 		}
 
+		// TODO: How to check a valid X-Device-Category?
 		deviceCategory := c.Get("X-Device-Category")
 		if len(deviceCategory) == 0 {
 			return helper.SendResponse(helper.ResponseStruct{
@@ -50,6 +59,7 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 			})
 		}
 
+		// TODO: How to check a valid X-Device-Type?
 		deviceType := c.Get("X-Device-Type")
 		if len(deviceType) == 0 {
 			return helper.SendResponse(helper.ResponseStruct{
@@ -76,25 +86,25 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 				DeviceCategory: deviceCategory,
 				DeviceType:     deviceType,
 			}
-			sessionData, err := repository.FindOneByAppID(appID)
+			sessionData, err := repository.FindOneByAppID(appID, false)
 			if err != nil {
 				session.RememberToken = sql.NullString{
 					String: helper.RandomString(10),
 					Valid:  true,
 				}
-				err := repository.Create(session)
-				if err != nil {
+				createErr := repository.Create(session)
+				if createErr != nil {
 					return helper.SendResponse(helper.ResponseStruct{
 						Ctx:        c,
 						StatusCode: fiber.StatusInternalServerError,
 						Message:    "Internal Server Error",
-						Error:      err.Error(),
+						Error:      createErr.Error(),
 					})
 				}
 			} else {
 				oldSessionPayload.SessionDecode(sessionData.Payload)
 				sessionPayload.Token = oldSessionPayload.Token
-				err = repository.Update(model.Session{
+				updateErr := repository.Update(model.Session{
 					Model: model.Model{
 						ID:       sessionData.ID,
 						Metadata: sessionData.Metadata,
@@ -112,23 +122,23 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 					DeviceCategory: deviceCategory,
 					DeviceType:     deviceType,
 				})
-				if err != nil {
+				if updateErr != nil {
 					return helper.SendResponse(helper.ResponseStruct{
 						Ctx:        c,
 						StatusCode: fiber.StatusInternalServerError,
 						Message:    "Internal Server Error",
-						Error:      err.Error(),
+						Error:      updateErr.Error(),
 					})
 				}
 			}
 		} else {
 			token := authorization[7:]
-			aToken, err := helper.ValidateRS512Token(config.Config.App.JWT.PublicKey, token)
+			aToken, err := helper.ValidateRS512Token(config.Config.App.JWT.PublicKey, token, false)
 			if err != nil {
 				return helper.SendResponse(helper.ResponseStruct{
 					Ctx:        c,
-					StatusCode: fiber.StatusInternalServerError,
-					Message:    "Internal Server Error",
+					StatusCode: fiber.StatusUnauthorized,
+					Message:    "Unauthorized",
 					Error:      err.Error(),
 				})
 			}
@@ -157,7 +167,7 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 
 			c.Locals("user", mapDecryptedData)
 
-			sessionData, err := repository.FindOneByAppID(appID)
+			sessionData, err := repository.FindOneByAppID(appID, false)
 			if err == nil {
 				oldSessionPayload.SessionDecode(sessionData.Payload)
 				sessionPayload.Token = oldSessionPayload.Token

@@ -4,8 +4,8 @@ import "database/sql"
 
 type PersonalAccessToken struct {
 	Model
-	TokenableID   int64          `gorm:"not null;type:bigint" json:"tokenable_id"`
 	TokenableType string         `gorm:"not null;type:varchar(255)" json:"tokenable_type"`
+	TokenableID   int64          `gorm:"not null;type:bigint" json:"tokenable_id"`
 	Tokenable     interface{}    `gorm:"-" json:"tokenable"`
 	Name          string         `gorm:"not null;type:varchar(255)" json:"name"`
 	Token         string         `gorm:"not null;type:varchar(64);unique" json:"token"`

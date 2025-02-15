@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/hafiddna/auth-starterkit-be/config"
 	"github.com/hafiddna/auth-starterkit-be/dto"
 	"github.com/hafiddna/auth-starterkit-be/helper"
@@ -68,7 +69,7 @@ func (a *authController) Login(c *fiber.Ctx) error {
 	}
 
 	appID := c.Get("X-App-Id")
-	sessionData, err := a.sessionService.FindOneByAppID(appID)
+	sessionData, err := a.sessionService.FindOneByAppID(appID, false)
 	if err != nil {
 		return helper.SendResponse(helper.ResponseStruct{
 			Ctx:        c,
@@ -85,13 +86,13 @@ func (a *authController) Login(c *fiber.Ctx) error {
 	accessToken := oldSessionPayload.Token.AccessToken
 	refreshToken := oldSessionPayload.Token.RefreshToken
 
-	aToken, err := helper.ValidateRS512Token(config.Config.App.JWT.PublicKey, accessToken)
+	aToken, err := helper.ValidateRS512Token(config.Config.App.JWT.PublicKey, accessToken, true)
 	if accessToken != "" && err == nil && aToken.Valid {
 		responseData["access_token"] = accessToken
 		sessionPayload.Token.AccessToken = accessToken
 	} else {
-		loginTokens, err := a.authService.Login(user)
-		if loginTokens == "" || err != nil {
+		newAccessToken, err := a.authService.Login(user)
+		if newAccessToken == "" || err != nil {
 			return helper.SendResponse(helper.ResponseStruct{
 				Ctx:        c,
 				StatusCode: fiber.StatusUnauthorized,
@@ -99,12 +100,12 @@ func (a *authController) Login(c *fiber.Ctx) error {
 			})
 		}
 
-		responseData["access_token"] = loginTokens
-		sessionPayload.Token.AccessToken = loginTokens
+		responseData["access_token"] = newAccessToken
+		sessionPayload.Token.AccessToken = newAccessToken
 	}
 
 	if *loginDto.Remember {
-		rToken, err := helper.ValidateRS512Token(config.Config.App.JWT.RememberTokenPublic, refreshToken)
+		rToken, err := helper.ValidateRS512Token(config.Config.App.JWT.RememberTokenPublic, refreshToken, true)
 		if refreshToken != "" && err == nil && rToken.Valid {
 			responseData["refresh_token"] = refreshToken
 			sessionPayload.Token.RefreshToken = refreshToken
@@ -170,7 +171,110 @@ func (a *authController) Refresh(c *fiber.Ctx) error {
 		})
 	}
 
-	return nil
+	rToken, err := helper.ValidateRS512Token(config.Config.App.JWT.RememberTokenPublic, refreshDTO.RefreshToken, true)
+	if err != nil {
+		return helper.SendResponse(helper.ResponseStruct{
+			Ctx:        c,
+			StatusCode: fiber.StatusUnauthorized,
+			Message:    "Unauthorized",
+		})
+	}
+
+	if !rToken.Valid {
+		return helper.SendResponse(helper.ResponseStruct{
+			Ctx:        c,
+			StatusCode: fiber.StatusUnauthorized,
+			Message:    "Unauthorized",
+		})
+	}
+
+	mapStringClaims := make(map[string]interface{})
+	for key, value := range rToken.Claims.(jwt.MapClaims) {
+		mapStringClaims[key] = value
+	}
+
+	appID := c.Get("X-App-Id")
+	sessionData, err := a.sessionService.FindOneByAppID(appID, true)
+	if err != nil {
+		return helper.SendResponse(helper.ResponseStruct{
+			Ctx:        c,
+			StatusCode: fiber.StatusNotFound,
+			Message:    "Not Found",
+		})
+	}
+
+	var encryptedData helper.EncryptedData
+	tokenData := helper.JSONMarshal(mapStringClaims["data"])
+	helper.JSONUnmarshal([]byte(tokenData), &encryptedData)
+	decryptedData, err := helper.DecryptAES256CBC(&encryptedData, []byte(config.Config.App.Secret.RememberTokenKey))
+	if err != nil {
+		return helper.SendResponse(helper.ResponseStruct{
+			Ctx:        c,
+			StatusCode: fiber.StatusInternalServerError,
+			Message:    "Internal Server Error",
+			Error:      err.Error(),
+		})
+	}
+
+	rememberToken := helper.RandomString(10)
+	responseData := make(map[string]interface{})
+
+	var oldSessionPayload model.SessionPayload
+	var sessionPayload model.SessionPayload
+	oldSessionPayload.SessionDecode(sessionData.Payload)
+
+	var rememberTokenPayload helper.JwtRememberClaim
+	helper.JSONUnmarshal([]byte(decryptedData), &rememberTokenPayload)
+	if sessionData.RememberToken.String != rememberTokenPayload.RememberToken {
+		return helper.SendResponse(helper.ResponseStruct{
+			Ctx:        c,
+			StatusCode: fiber.StatusUnauthorized,
+			Message:    "Unauthorized",
+		})
+	}
+
+	newAccessToken, err := a.authService.Login(sessionData.User)
+	if newAccessToken == "" || err != nil {
+		return helper.SendResponse(helper.ResponseStruct{
+			Ctx:        c,
+			StatusCode: fiber.StatusUnauthorized,
+			Message:    "Your account is not active",
+		})
+	}
+	responseData["access_token"] = newAccessToken
+	sessionPayload.Token.AccessToken = newAccessToken
+
+	rememberTokenDuration := time.Now().Add(time.Hour * 24)
+	rememberData := helper.JwtRememberClaim{
+		RememberToken: rememberToken,
+	}
+	rememberAccessToken := helper.GenerateRS512Token(config.Config.App.JWT.RememberTokenPrivate, config.Config.App.Secret.RememberTokenKey, sessionData.User.ID, rememberData, rememberTokenDuration)
+	responseData["refresh_token"] = rememberAccessToken
+	sessionPayload.Token.RefreshToken = rememberAccessToken
+
+	sessionPayload.Previous = oldSessionPayload.Previous
+	sessionData.Payload = sessionPayload.SessionEncode()
+	sessionData.RememberToken = sql.NullString{
+		String: rememberToken,
+		Valid:  true,
+	}
+	sessionData.LastActivity = time.Now().UnixNano() / int64(time.Millisecond)
+	err = a.sessionService.Update(sessionData)
+	if err != nil {
+		return helper.SendResponse(helper.ResponseStruct{
+			Ctx:        c,
+			StatusCode: fiber.StatusInternalServerError,
+			Message:    "Internal Server Error",
+			Error:      err.Error(),
+		})
+	}
+
+	return helper.SendResponse(helper.ResponseStruct{
+		Ctx:        c,
+		StatusCode: fiber.StatusOK,
+		Message:    "Success",
+		Data:       responseData,
+	})
 }
 
 func (a *authController) GetProfile(c *fiber.Ctx) error {
@@ -202,6 +306,34 @@ func (a *authController) GetProfile(c *fiber.Ctx) error {
 }
 
 func (a *authController) Logout(c *fiber.Ctx) error {
-	// TODO: Remove session here
-	return nil
+	appID := c.Get("X-App-Id")
+	sessionData, err := a.sessionService.FindOneByAppID(appID, false)
+	if err != nil {
+		return helper.SendResponse(helper.ResponseStruct{
+			Ctx:        c,
+			StatusCode: fiber.StatusNotFound,
+			Message:    "Not Found",
+		})
+	}
+
+	var sessionPayload model.SessionPayload
+	var oldSessionPayload model.SessionPayload
+	oldSessionPayload.SessionDecode(sessionData.Payload)
+
+	sessionPayload.Token.AccessToken = ""
+	sessionPayload.Token.RefreshToken = ""
+	sessionPayload.Previous = oldSessionPayload.Previous
+
+	sessionData.Payload = sessionPayload.SessionEncode()
+	sessionData.UserID = sql.NullString{
+		String: "",
+		Valid:  false,
+	}
+	go a.sessionService.Update(sessionData)
+
+	return helper.SendResponse(helper.ResponseStruct{
+		Ctx:        c,
+		StatusCode: fiber.StatusOK,
+		Message:    "Success",
+	})
 }

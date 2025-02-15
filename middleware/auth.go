@@ -18,7 +18,7 @@ func AuthMiddleware() fiber.Handler {
 		}
 
 		token := authorization[7:]
-		aToken, err := helper.ValidateRS512Token(config.Config.App.JWT.PublicKey, token)
+		aToken, err := helper.ValidateRS512Token(config.Config.App.JWT.PublicKey, token, true)
 		if err != nil {
 			return helper.SendResponse(helper.ResponseStruct{
 				Ctx:        c,

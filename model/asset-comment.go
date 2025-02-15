@@ -11,8 +11,9 @@ type AssetComment struct {
 	//User       User           `gorm:"foreignKey:UserID" json:"user"`
 	//Parent     *AssetComment  `gorm:"foreignKey:ParentID" json:"parent"`
 	//Children   []AssetComment `gorm:"foreignKey:ParentID" json:"children"`
-	Comment    string `gorm:"type:text" json:"comment"`
-	IsResolved bool   `gorm:"type:boolean;default:false" json:"is_resolved"`
+	Comment string `gorm:"type:text" json:"comment"`
+	// TODO: What is this column for???
+	IsResolved bool `gorm:"type:boolean;default:false" json:"is_resolved"`
 }
 
 func (a *AssetComment) TableName() string {

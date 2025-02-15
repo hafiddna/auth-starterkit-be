@@ -6,7 +6,7 @@ import (
 )
 
 type SessionService interface {
-	FindOneByAppID(appID string) (session model.Session, err error)
+	FindOneByAppID(appID string, preloadTokenData bool) (session model.Session, err error)
 	Create(session model.Session) error
 	Update(session model.Session) error
 }
@@ -21,8 +21,8 @@ func NewSessionService(sessionRepository repository.SessionRepository) SessionSe
 	}
 }
 
-func (s *sessionService) FindOneByAppID(appID string) (session model.Session, err error) {
-	return s.sessionRepository.FindOneByAppID(appID)
+func (s *sessionService) FindOneByAppID(appID string, preloadTokenData bool) (session model.Session, err error) {
+	return s.sessionRepository.FindOneByAppID(appID, preloadTokenData)
 }
 
 func (s *sessionService) Create(session model.Session) error {

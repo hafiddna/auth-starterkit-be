@@ -16,12 +16,14 @@ type AuthService interface {
 }
 
 type authService struct {
-	userService UserService
+	userService    UserService
+	sessionService SessionService
 }
 
-func NewAuthService(userService UserService) AuthService {
+func NewAuthService(userService UserService, sessionService SessionService) AuthService {
 	return &authService{
-		userService: userService,
+		userService:    userService,
+		sessionService: sessionService,
 	}
 }
 

@@ -21,7 +21,7 @@ type User struct {
 	//Setting                UserSetting          `gorm:"-" json:"setting"`
 	Roles []Role `gorm:"many2many:user_role;joinForeignKey:UserID;joinReferences:RoleID" json:"roles"`
 	//PasswordResetTokens    []PasswordResetToken `gorm:"foreignKey:UserID" json:"password_reset_tokens"`
-	//Sessions               []Session            `gorm:"foreignKey:UserID" json:"sessions"`
+	Sessions []Session `gorm:"foreignKey:UserID" json:"sessions"`
 	//AssetShares            []AssetShare         `gorm:"many2many:asset_share" json:"asset_shares"`
 	//AssetComments          []AssetComment       `gorm:"many2many:asset_comment" json:"asset_comments"`
 	//Folders                []Folder             `gorm:"polymorphicType:OwnerType;polymorphicId:OwnerID;polymorphicValue:users" json:"folders"`

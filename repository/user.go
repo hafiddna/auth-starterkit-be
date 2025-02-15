@@ -25,10 +25,10 @@ func NewUserRepository(db *gorm.DB, minio *minio.Client) UserRepository {
 }
 
 func (r *userRepository) FindByEmailPhoneOrUsername(credential string) (user model.User, err error) {
-	r.db = r.db.Where("email = ?", credential).Or("phone = ?", credential).Or("username = ?", credential).
+	query := r.db.Where("email = ?", credential).Or("phone = ?", credential).Or("username = ?", credential).
 		Preload("Roles", "team_id IS NULL").Preload("Roles.Permissions")
 	if config.Config.App.AuthConfig.IsTeamEnabled {
-		r.db = r.db.Preload("Teams", func(db *gorm.DB) *gorm.DB {
+		query = query.Preload("Teams", func(db *gorm.DB) *gorm.DB {
 			return db.Joins("JOIN team_user ON team_user.team_id = teams.id").
 				Where("team_user.is_active = ?", true)
 		}).Preload("Teams.Roles").Preload("Teams.Roles.Permissions").
@@ -37,7 +37,7 @@ func (r *userRepository) FindByEmailPhoneOrUsername(credential string) (user mod
 					Where("team_user.is_active = ?", true)
 			}).Preload("MembersOf.Roles").Preload("MembersOf.Roles.Permissions")
 	}
-	err = r.db.First(&user).Error
+	err = query.First(&user).Error
 	if err != nil {
 		return user, err
 	}
@@ -46,13 +46,13 @@ func (r *userRepository) FindByEmailPhoneOrUsername(credential string) (user mod
 }
 
 func (r *userRepository) FindOneById(id string) (user model.User, err error) {
-	r.db = r.db.Where("id = ?", id)
+	query := r.db.Where("id = ?", id)
 
 	if config.Config.App.AuthConfig.IsTeamEnabled {
-		r.db = r.db.Preload("Teams").Preload("MembersOf")
+		query = query.Preload("Teams").Preload("MembersOf")
 	}
 
-	err = r.db.First(&user).Error
+	err = query.First(&user).Error
 	if err != nil {
 		return user, err
 	}

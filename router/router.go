@@ -113,7 +113,7 @@ func SetupRoutes(app *fiber.App) {
 	// Service
 	sessionService := service.NewSessionService(sessionRepository)
 	userService := service.NewUserService(userRepository, userProfileRepository, userSettingRepository, roleUserRepository)
-	authService := service.NewAuthService(userService)
+	authService := service.NewAuthService(userService, sessionService)
 
 	// Controller
 	authController := controller.NewAuthController(authService, sessionService, validator)

@@ -84,7 +84,7 @@ func GenerateRS512Token(privateKey, key, userID string, data interface{}, durati
 	return t
 }
 
-func ValidateRS512Token(publicKey, token string) (*jwt.Token, error) {
+func ValidateRS512Token(publicKey, token string, isCheckingExpiration bool) (*jwt.Token, error) {
 	bytePublicKey := []byte(publicKey)
 
 	rsaPublicKey, err := jwt.ParseRSAPublicKeyFromPEM(bytePublicKey)
@@ -99,12 +99,15 @@ func ValidateRS512Token(publicKey, token string) (*jwt.Token, error) {
 		return rsaPublicKey, nil
 	})
 
-	if err != nil {
-		if errors.Is(err, jwt.ErrTokenExpired) {
+	// TODO: Is this method is the right way to skip checking the token expiration?
+	if isCheckingExpiration {
+		if err != nil {
+			if errors.Is(err, jwt.ErrTokenExpired) {
+				return nil, err
+			}
+
 			return nil, err
 		}
-
-		return nil, err
 	}
 
 	return parsedToken, nil
