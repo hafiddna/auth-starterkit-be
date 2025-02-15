@@ -92,11 +92,19 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 					String: helper.RandomString(10),
 					Valid:  true,
 				}
-				go repository.Create(session)
+				err = repository.Create(session)
+				if err != nil {
+					return helper.SendResponse(helper.ResponseStruct{
+						Ctx:        c,
+						StatusCode: fiber.StatusInternalServerError,
+						Message:    "Internal Server Error",
+						Error:      err.Error(),
+					})
+				}
 			} else {
 				oldSessionPayload.SessionDecode(sessionData.Payload)
 				sessionPayload.Token = oldSessionPayload.Token
-				go repository.Update(model.Session{
+				err = repository.Update(model.Session{
 					Model: model.Model{
 						ID:       sessionData.ID,
 						Metadata: sessionData.Metadata,
@@ -114,6 +122,14 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 					DeviceCategory: deviceCategory,
 					DeviceType:     deviceType,
 				})
+				if err != nil {
+					return helper.SendResponse(helper.ResponseStruct{
+						Ctx:        c,
+						StatusCode: fiber.StatusInternalServerError,
+						Message:    "Internal Server Error",
+						Error:      err.Error(),
+					})
+				}
 			}
 		} else {
 			token := authorization[7:]
@@ -155,7 +171,7 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 			if err == nil {
 				oldSessionPayload.SessionDecode(sessionData.Payload)
 				sessionPayload.Token = oldSessionPayload.Token
-				go repository.Update(model.Session{
+				err = repository.Update(model.Session{
 					Model: model.Model{
 						ID:       sessionData.ID,
 						Metadata: sessionData.Metadata,
@@ -173,6 +189,14 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 					DeviceCategory: deviceCategory,
 					DeviceType:     deviceType,
 				})
+				if err != nil {
+					return helper.SendResponse(helper.ResponseStruct{
+						Ctx:        c,
+						StatusCode: fiber.StatusInternalServerError,
+						Message:    "Internal Server Error",
+						Error:      err.Error(),
+					})
+				}
 			} else {
 				return helper.SendResponse(helper.ResponseStruct{
 					Ctx:        c,
