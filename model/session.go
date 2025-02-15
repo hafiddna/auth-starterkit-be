@@ -26,11 +26,17 @@ func (s *Session) TableName() string {
 	return "sessions"
 }
 
+type TokenPayload struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+}
+
 type PreviousPayload struct {
 	URL string `json:"url"`
 }
 
 type SessionPayload struct {
+	Token    TokenPayload    `json:"_token"`
 	Previous PreviousPayload `json:"_previous"`
 }
 

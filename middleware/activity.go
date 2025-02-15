@@ -13,7 +13,9 @@ import (
 
 func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 	return func(c *fiber.Ctx) error {
+		var oldSessionPayload model.SessionPayload
 		var sessionPayload model.SessionPayload
+		// TODO: Handle if the API accessed doesn't have Referer / is a functional API, not a page API
 		sessionPayload.Previous.URL = c.Get("Referer")
 
 		authorization := c.Get("Authorization")
@@ -92,7 +94,9 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 					})
 				}
 			} else {
-				err := repository.Update(model.Session{
+				oldSessionPayload.SessionDecode(sessionData.Payload)
+				sessionPayload.Token = oldSessionPayload.Token
+				err = repository.Update(model.Session{
 					Model: model.Model{
 						ID:       sessionData.ID,
 						Metadata: sessionData.Metadata,
@@ -125,8 +129,8 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 			if err != nil {
 				return helper.SendResponse(helper.ResponseStruct{
 					Ctx:        c,
-					StatusCode: fiber.StatusUnauthorized,
-					Message:    "Unauthorized",
+					StatusCode: fiber.StatusInternalServerError,
+					Message:    "Internal Server Error",
 					Error:      err.Error(),
 				})
 			}
@@ -136,14 +140,6 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 				mapStringClaims[key] = value
 			}
 
-			if !aToken.Valid {
-				return helper.SendResponse(helper.ResponseStruct{
-					Ctx:        c,
-					StatusCode: fiber.StatusUnauthorized,
-					Message:    "Unauthorized",
-				})
-			}
-
 			var encryptedData helper.EncryptedData
 			tokenData := helper.JSONMarshal(mapStringClaims["data"])
 			helper.JSONUnmarshal([]byte(tokenData), &encryptedData)
@@ -151,8 +147,8 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 			if err != nil {
 				return helper.SendResponse(helper.ResponseStruct{
 					Ctx:        c,
-					StatusCode: fiber.StatusUnauthorized,
-					Message:    "Unauthorized",
+					StatusCode: fiber.StatusInternalServerError,
+					Message:    "Internal Server Error",
 					Error:      err.Error(),
 				})
 			}
@@ -165,7 +161,9 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 
 			sessionData, err := repository.FindOneByAppID(appID)
 			if err == nil {
-				err := repository.Update(model.Session{
+				oldSessionPayload.SessionDecode(sessionData.Payload)
+				sessionPayload.Token = oldSessionPayload.Token
+				err = repository.Update(model.Session{
 					Model: model.Model{
 						ID:       sessionData.ID,
 						Metadata: sessionData.Metadata,

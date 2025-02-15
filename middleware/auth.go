@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/hafiddna/auth-starterkit-be/config"
 	"github.com/hafiddna/auth-starterkit-be/helper"
 )
@@ -27,11 +26,6 @@ func AuthMiddleware() fiber.Handler {
 				Message:    "Unauthorized",
 				Error:      err.Error(),
 			})
-		}
-
-		mapStringClaims := make(map[string]interface{})
-		for key, value := range aToken.Claims.(jwt.MapClaims) {
-			mapStringClaims[key] = value
 		}
 
 		if !aToken.Valid {
