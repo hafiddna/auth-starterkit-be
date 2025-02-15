@@ -86,25 +86,17 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 				DeviceCategory: deviceCategory,
 				DeviceType:     deviceType,
 			}
-			sessionData, err := repository.FindOneByAppID(appID, false)
+			sessionData, err := repository.FindOneByAppID(appID)
 			if err != nil {
 				session.RememberToken = sql.NullString{
 					String: helper.RandomString(10),
 					Valid:  true,
 				}
-				createErr := repository.Create(session)
-				if createErr != nil {
-					return helper.SendResponse(helper.ResponseStruct{
-						Ctx:        c,
-						StatusCode: fiber.StatusInternalServerError,
-						Message:    "Internal Server Error",
-						Error:      createErr.Error(),
-					})
-				}
+				go repository.Create(session)
 			} else {
 				oldSessionPayload.SessionDecode(sessionData.Payload)
 				sessionPayload.Token = oldSessionPayload.Token
-				updateErr := repository.Update(model.Session{
+				go repository.Update(model.Session{
 					Model: model.Model{
 						ID:       sessionData.ID,
 						Metadata: sessionData.Metadata,
@@ -122,14 +114,6 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 					DeviceCategory: deviceCategory,
 					DeviceType:     deviceType,
 				})
-				if updateErr != nil {
-					return helper.SendResponse(helper.ResponseStruct{
-						Ctx:        c,
-						StatusCode: fiber.StatusInternalServerError,
-						Message:    "Internal Server Error",
-						Error:      updateErr.Error(),
-					})
-				}
 			}
 		} else {
 			token := authorization[7:]
@@ -167,11 +151,11 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 
 			c.Locals("user", mapDecryptedData)
 
-			sessionData, err := repository.FindOneByAppID(appID, false)
+			sessionData, err := repository.FindOneByAppID(appID)
 			if err == nil {
 				oldSessionPayload.SessionDecode(sessionData.Payload)
 				sessionPayload.Token = oldSessionPayload.Token
-				err = repository.Update(model.Session{
+				go repository.Update(model.Session{
 					Model: model.Model{
 						ID:       sessionData.ID,
 						Metadata: sessionData.Metadata,
@@ -189,15 +173,6 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 					DeviceCategory: deviceCategory,
 					DeviceType:     deviceType,
 				})
-
-				if err != nil {
-					return helper.SendResponse(helper.ResponseStruct{
-						Ctx:        c,
-						StatusCode: fiber.StatusInternalServerError,
-						Message:    "Internal Server Error",
-						Error:      err.Error(),
-					})
-				}
 			} else {
 				return helper.SendResponse(helper.ResponseStruct{
 					Ctx:        c,

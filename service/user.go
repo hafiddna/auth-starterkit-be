@@ -8,6 +8,7 @@ import (
 
 type UserService interface {
 	FindByEmailPhoneOrUsername(credential string) (user model.User, err error)
+	FindByIDWithTokenData(id string) (user model.User, err error)
 	Profile(id string) (data dto.UserProfileDTO, err error)
 }
 
@@ -29,6 +30,10 @@ func NewUserService(userRepository repository.UserRepository, userProfile reposi
 
 func (s *userService) FindByEmailPhoneOrUsername(credential string) (user model.User, err error) {
 	return s.userRepository.FindByEmailPhoneOrUsername(credential)
+}
+
+func (s *userService) FindByIDWithTokenData(id string) (user model.User, err error) {
+	return s.userRepository.FindByIDWithTokenData(id)
 }
 
 func (s *userService) Profile(id string) (data dto.UserProfileDTO, err error) {

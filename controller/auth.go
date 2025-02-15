@@ -69,7 +69,7 @@ func (a *authController) Login(c *fiber.Ctx) error {
 	}
 
 	appID := c.Get("X-App-Id")
-	sessionData, err := a.sessionService.FindOneByAppID(appID, false)
+	sessionData, err := a.sessionService.FindOneByAppID(appID)
 	if err != nil {
 		return helper.SendResponse(helper.ResponseStruct{
 			Ctx:        c,
@@ -194,7 +194,7 @@ func (a *authController) Refresh(c *fiber.Ctx) error {
 	}
 
 	appID := c.Get("X-App-Id")
-	sessionData, err := a.sessionService.FindOneByAppID(appID, true)
+	sessionData, err := a.sessionService.FindOneByAppID(appID)
 	if err != nil {
 		return helper.SendResponse(helper.ResponseStruct{
 			Ctx:        c,
@@ -233,12 +233,14 @@ func (a *authController) Refresh(c *fiber.Ctx) error {
 		})
 	}
 
-	newAccessToken, err := a.authService.Login(sessionData.User)
+	user, err := a.authService.GetTokenData(sessionData.UserID.String)
+
+	newAccessToken, err := a.authService.Login(user)
 	if newAccessToken == "" || err != nil {
 		return helper.SendResponse(helper.ResponseStruct{
 			Ctx:        c,
 			StatusCode: fiber.StatusUnauthorized,
-			Message:    "Your account is not active",
+			Message:    "Unauthorized",
 		})
 	}
 	responseData["access_token"] = newAccessToken
@@ -307,7 +309,7 @@ func (a *authController) GetProfile(c *fiber.Ctx) error {
 
 func (a *authController) Logout(c *fiber.Ctx) error {
 	appID := c.Get("X-App-Id")
-	sessionData, err := a.sessionService.FindOneByAppID(appID, false)
+	sessionData, err := a.sessionService.FindOneByAppID(appID)
 	if err != nil {
 		return helper.SendResponse(helper.ResponseStruct{
 			Ctx:        c,

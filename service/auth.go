@@ -11,6 +11,7 @@ import (
 
 type AuthService interface {
 	ValidateUser(dto dto.LoginDTO) (user model.User, err error)
+	GetTokenData(userID string) (user model.User, err error)
 	Login(user model.User) (accessToken string, err error)
 	Profile(id string) (data dto.UserProfileDTO, err error)
 }
@@ -38,6 +39,10 @@ func (a *authService) ValidateUser(dto dto.LoginDTO) (user model.User, err error
 	}
 
 	return user, fmt.Errorf("invalid password")
+}
+
+func (a *authService) GetTokenData(userID string) (user model.User, err error) {
+	return a.userService.FindByIDWithTokenData(userID)
 }
 
 func (a *authService) Login(user model.User) (accessToken string, err error) {
