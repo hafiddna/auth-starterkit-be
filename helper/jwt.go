@@ -99,15 +99,16 @@ func ValidateRS512Token(publicKey, token string, isCheckingExpiration bool) (*jw
 		return rsaPublicKey, nil
 	})
 
-	// TODO: Is this method is the right way to skip checking the token expiration?
-	if isCheckingExpiration {
-		if err != nil {
+	if err != nil {
+		if isCheckingExpiration {
 			if errors.Is(err, jwt.ErrTokenExpired) {
 				return nil, err
 			}
-
-			return nil, err
+		} else {
+			return nil, nil
 		}
+
+		return nil, err
 	}
 
 	return parsedToken, nil

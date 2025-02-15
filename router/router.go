@@ -127,8 +127,8 @@ func SetupRoutes(app *fiber.App) {
 
 	// Auth
 	//public.Post("/register", authController.Register)
-	public.Post("/login", authController.Login)           // TODO: Check
-	public.Post("/refresh-token", authController.Refresh) // TODO: Check
+	public.Post("/login", authController.Login) // TODO: Check
+	public.Post("/refresh-token", authController.Refresh)
 	//public.Post("/forgot-password", authController.ForgotPassword)
 	//public.Patch("/reset-password", authController.ResetPassword)
 	// End::Public Routes
@@ -143,7 +143,7 @@ func SetupRoutes(app *fiber.App) {
 	//private.Patch("/change-password", authController.ChangePassword)
 	//private.Patch("/users/:id/account-activation", userController.AccountActivation)
 	//private.Get("/verify-email/{id}/{hash}", authController.VerifyEmail)
-	private.Post("/logout", authController.Logout) // TODO: Check
+	private.Post("/logout", authController.Logout)
 	// End::Private Routes
 
 	// Not Found
