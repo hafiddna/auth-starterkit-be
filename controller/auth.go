@@ -37,6 +37,9 @@ func NewAuthController(authService service.AuthService, sessionService service.S
 
 func (a *authController) Login(c *fiber.Ctx) error {
 	// TODO: Differentiate between login web and login mobile
+	// TODO: Add rate limiter
+	// TODO: Add MFA (Multi-Factor Authentication)
+	// TODO: Add OAuth2 (https://chatgpt.com/c/67b15eba-82e4-8002-bebb-e4da309ddccc)
 	var loginDto dto.LoginDTO
 	if err := c.BodyParser(&loginDto); err != nil {
 		return helper.SendResponse(helper.ResponseStruct{
