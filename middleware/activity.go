@@ -15,8 +15,6 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		var oldSessionPayload model.SessionPayload
 		var sessionPayload model.SessionPayload
-		// TODO: Handle if the API accessed doesn't have Referer / is a functional API, not a page API
-		sessionPayload.Previous.URL = c.Get("Referer")
 
 		authorization := c.Get("Authorization")
 		ipAddress := c.IP()
@@ -98,10 +96,16 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 				DeviceType:     deviceType,
 			}
 			sessionData, err := repository.FindOneByAppID(appID)
+			oldSessionPayload.SessionDecode(sessionData.Payload)
 			if err != nil {
 				session.RememberToken = sql.NullString{
 					String: helper.RandomString(10),
 					Valid:  true,
+				}
+				if c.Get("Referer") != "" {
+					sessionPayload.Previous.URL = c.Get("Referer")
+				} else {
+					sessionPayload.Previous.URL = oldSessionPayload.Previous.URL
 				}
 				err = repository.Create(session)
 				if err != nil {
@@ -113,7 +117,11 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 					})
 				}
 			} else {
-				oldSessionPayload.SessionDecode(sessionData.Payload)
+				if c.Get("Referer") != "" {
+					sessionPayload.Previous.URL = c.Get("Referer")
+				} else {
+					sessionPayload.Previous.URL = oldSessionPayload.Previous.URL
+				}
 				sessionPayload.Token = oldSessionPayload.Token
 				err = repository.Update(model.Session{
 					Model: model.Model{
@@ -179,8 +187,13 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 			c.Locals("user", mapDecryptedData)
 
 			sessionData, err := repository.FindOneByAppID(appID)
+			oldSessionPayload.SessionDecode(sessionData.Payload)
 			if err == nil {
-				oldSessionPayload.SessionDecode(sessionData.Payload)
+				if c.Get("Referer") != "" {
+					sessionPayload.Previous.URL = c.Get("Referer")
+				} else {
+					sessionPayload.Previous.URL = oldSessionPayload.Previous.URL
+				}
 				sessionPayload.Token = oldSessionPayload.Token
 				err = repository.Update(model.Session{
 					Model: model.Model{
