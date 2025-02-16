@@ -16,7 +16,7 @@ import (
 
 type AuthController interface {
 	Login(c *fiber.Ctx) error
-	Refresh(c *fiber.Ctx) error
+	RefreshToken(c *fiber.Ctx) error
 	GetProfile(c *fiber.Ctx) error
 	Logout(c *fiber.Ctx) error
 }
@@ -148,7 +148,7 @@ func (a *authController) Login(c *fiber.Ctx) error {
 	})
 }
 
-func (a *authController) Refresh(c *fiber.Ctx) error {
+func (a *authController) RefreshToken(c *fiber.Ctx) error {
 	var refreshDTO dto.RefreshDTO
 	if err := c.BodyParser(&refreshDTO); err != nil {
 		return helper.SendResponse(helper.ResponseStruct{
