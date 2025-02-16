@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"database/sql"
+	"errors"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/hafiddna/auth-starterkit-be/config"
@@ -128,10 +129,7 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 						ID:       sessionData.ID,
 						Metadata: sessionData.Metadata,
 					},
-					UserID: sql.NullString{
-						String: "",
-						Valid:  false,
-					},
+					UserID:         sessionData.UserID,
 					IPAddress:      session.IPAddress,
 					UserAgent:      session.UserAgent,
 					Payload:        sessionPayload.SessionEncode(),
@@ -152,8 +150,8 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 			}
 		} else {
 			token := authorization[7:]
-			aToken, err := helper.ValidateRS512Token(config.Config.App.JWT.PublicKey, token, false)
-			if err != nil {
+			aToken, err := helper.ValidateRS512Token(config.Config.App.JWT.PublicKey, token)
+			if err != nil && !errors.Is(err, jwt.ErrTokenExpired) {
 				return helper.SendResponse(helper.ResponseStruct{
 					Ctx:        c,
 					StatusCode: fiber.StatusUnauthorized,

@@ -7,10 +7,12 @@ import (
 	"crypto/hmac"
 	"crypto/rand"
 	"crypto/sha256"
+	"crypto/subtle"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	uuid2 "github.com/google/uuid"
+	"golang.org/x/crypto/argon2"
 	"golang.org/x/crypto/bcrypt"
 	"io"
 	"log"
@@ -44,6 +46,16 @@ func JSONMarshal(data interface{}) string {
 	jsonResult, _ := json.Marshal(data)
 
 	return string(jsonResult)
+}
+
+func HashArgon2id(password, salt string) string {
+	hash := argon2.IDKey([]byte(password), []byte(salt), 1, 64*1024, 4, 32)
+	return base64.StdEncoding.EncodeToString(hash)
+}
+
+func CompareArgon2id(inputPassword, salt, storedHash string) bool {
+	hashed := HashArgon2id(inputPassword, salt)
+	return subtle.ConstantTimeCompare([]byte(hashed), []byte(storedHash)) == 1
 }
 
 func ComparePassword(hashedPassword, password string) bool {

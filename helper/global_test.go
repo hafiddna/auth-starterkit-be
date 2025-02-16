@@ -95,6 +95,57 @@ func TestJSONMarshal(t *testing.T) {
 	}
 }
 
+func TestHashArgon2id(t *testing.T) {
+	type args struct {
+		password string
+		salt     string
+	}
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "success",
+			args: args{password: "password", salt: "salt"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := HashArgon2id(tt.args.password, tt.args.salt); got == "" {
+				t.Errorf("HashArgon2id() = %v, want not empty", got)
+			}
+		})
+	}
+}
+
+func TestCompareArgon2id(t *testing.T) {
+	type args struct {
+		inputPassword string
+		salt          string
+		storedHash    string
+	}
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "success",
+			args: args{
+				inputPassword: "password",
+				salt:          "salt",
+				storedHash:    "hash",
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := CompareArgon2id(tt.args.inputPassword, tt.args.salt, tt.args.storedHash); got {
+				t.Errorf("CompareArgon2id() = %v, want false", got)
+			}
+		})
+	}
+}
+
 func TestComparePassword(t *testing.T) {
 	type args struct {
 		hashedPassword string

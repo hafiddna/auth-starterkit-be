@@ -84,7 +84,7 @@ func GenerateRS512Token(privateKey, key, userID string, data interface{}, durati
 	return t
 }
 
-func ValidateRS512Token(publicKey, token string, isCheckingExpiration bool) (*jwt.Token, error) {
+func ValidateRS512Token(publicKey, token string) (*jwt.Token, error) {
 	bytePublicKey := []byte(publicKey)
 
 	rsaPublicKey, err := jwt.ParseRSAPublicKeyFromPEM(bytePublicKey)
@@ -92,22 +92,12 @@ func ValidateRS512Token(publicKey, token string, isCheckingExpiration bool) (*jw
 		return nil, err
 	}
 
-	parsedToken, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+	return jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
 			return nil, jwt.ErrInvalidKeyType
 		}
 		return rsaPublicKey, nil
 	})
-
-	if err != nil {
-		if errors.Is(err, jwt.ErrTokenExpired) && !isCheckingExpiration {
-			return parsedToken, nil
-		}
-
-		return nil, err
-	}
-
-	return parsedToken, nil
 }
 
 func GenerateHS256Token(secret, key, userID string, data interface{}, duration time.Time) string {

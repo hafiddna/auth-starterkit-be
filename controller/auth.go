@@ -89,7 +89,7 @@ func (a *authController) Login(c *fiber.Ctx) error {
 	accessToken := oldSessionPayload.Token.AccessToken
 	refreshToken := oldSessionPayload.Token.RefreshToken
 
-	aToken, err := helper.ValidateRS512Token(config.Config.App.JWT.PublicKey, accessToken, true)
+	aToken, err := helper.ValidateRS512Token(config.Config.App.JWT.PublicKey, accessToken)
 	if accessToken != "" && err == nil && aToken.Valid {
 		responseData["access_token"] = accessToken
 		sessionPayload.Token.AccessToken = accessToken
@@ -108,7 +108,7 @@ func (a *authController) Login(c *fiber.Ctx) error {
 	}
 
 	if *loginDto.Remember {
-		rToken, err := helper.ValidateRS512Token(config.Config.App.JWT.RememberTokenPublic, refreshToken, true)
+		rToken, err := helper.ValidateRS512Token(config.Config.App.JWT.RememberTokenPublic, refreshToken)
 		if refreshToken != "" && err == nil && rToken.Valid {
 			responseData["refresh_token"] = refreshToken
 			sessionPayload.Token.RefreshToken = refreshToken
@@ -174,7 +174,7 @@ func (a *authController) RefreshToken(c *fiber.Ctx) error {
 		})
 	}
 
-	rToken, err := helper.ValidateRS512Token(config.Config.App.JWT.RememberTokenPublic, refreshDTO.RefreshToken, true)
+	rToken, err := helper.ValidateRS512Token(config.Config.App.JWT.RememberTokenPublic, refreshDTO.RefreshToken)
 	if err != nil {
 		return helper.SendResponse(helper.ResponseStruct{
 			Ctx:        c,

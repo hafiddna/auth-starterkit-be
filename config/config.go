@@ -51,9 +51,10 @@ type CfgStruct struct {
 			Token string `mapstructure:"token"`
 		} `mapstructure:"discord"`
 		Secret struct {
-			AuthKey           string `mapstructure:"auth_key"`
-			RememberTokenKey  string `mapstructure:"remember_token_key"`
-			DataEncryptionKey string `mapstructure:"data_encryption_key"`
+			AuthKey               string `mapstructure:"auth_key"`
+			RememberTokenKey      string `mapstructure:"remember_token_key"`
+			DataEncryptionKey     string `mapstructure:"data_encryption_key"`
+			PasswordEncryptionKey string `mapstructure:"password_encryption_key"`
 		} `mapstructure:"secret"`
 		AuthConfig struct {
 			IsTeamEnabled bool `mapstructure:"is_team_enabled"`
