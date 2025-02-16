@@ -206,3 +206,48 @@ func JSONPrettyLog(v interface{}) {
 		log.Println(string(b))
 	}
 }
+
+var xDeviceCategory = []string{
+	"Web",
+	"Mobile",
+	"Desktop Apps",
+	"Smart Devices",
+	"Game Consoles",
+	"Bots and Automation",
+	"Virtual or Cloud",
+	"Others",
+}
+
+func IsValidDeviceCategory(deviceCategory string) bool {
+	return ArrayStringContains(xDeviceCategory, deviceCategory)
+}
+
+var xDeviceType = []string{
+	"Desktop Browser",
+	"Mobile Browser",
+	"Tablet Browser",
+	"Andriod App",
+	"iOS App",
+	"Tablet App",
+	"Windows App",
+	"MacOS App",
+	"Linux App",
+	"Electron App",
+	"Smart TV",
+	"Wearables (Smartwatches)",
+	"IoT Devices",
+	"PlayStation",
+	"Xbox",
+	"Nintendo Switch",
+	"Headless Browser",
+	"API Client",
+	"Automated Scripts",
+	"Cloud Server Instance",
+	"Remote Desktop Session",
+	"Virtual Machines",
+	"Others",
+}
+
+func IsValidDeviceType(deviceType string) bool {
+	return ArrayStringContains(xDeviceType, deviceType)
+}

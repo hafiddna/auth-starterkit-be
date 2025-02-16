@@ -281,3 +281,55 @@ func TestDecryptAES256CBC(t *testing.T) {
 		})
 	}
 }
+
+func TestIsValidDeviceCategory(t *testing.T) {
+	type args struct {
+		category string
+	}
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "success",
+			args: args{category: "Web"},
+		},
+		{
+			name: "failed",
+			args: args{category: "desktop"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := IsValidDeviceCategory(tt.args.category); got != (tt.name == "success") {
+				t.Errorf("IsValidDeviceCategory() = %v, want %v", got, tt.name == "success")
+			}
+		})
+	}
+}
+
+func TestIsValidDeviceType(t *testing.T) {
+	type args struct {
+		deviceType string
+	}
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "success",
+			args: args{deviceType: "Desktop Browser"},
+		},
+		{
+			name: "failed",
+			args: args{deviceType: "desktop"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := IsValidDeviceType(tt.args.deviceType); got != (tt.name == "success") {
+				t.Errorf("IsValidDeviceType() = %v, want %v", got, tt.name == "success")
+			}
+		})
+	}
+}

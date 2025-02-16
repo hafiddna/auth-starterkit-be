@@ -21,7 +21,6 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 		authorization := c.Get("Authorization")
 		ipAddress := c.IP()
 		userAgent := c.Get("User-Agent")
-		// TODO: How to check a valid User-Agent?
 		if len(userAgent) == 0 {
 			return helper.SendResponse(helper.ResponseStruct{
 				Ctx:        c,
@@ -48,18 +47,23 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 			})
 		}
 
-		// TODO: How to check a valid X-Device-Category?
 		deviceCategory := c.Get("X-Device-Category")
 		if len(deviceCategory) == 0 {
 			return helper.SendResponse(helper.ResponseStruct{
 				Ctx:        c,
 				StatusCode: fiber.StatusBadRequest,
 				Message:    "Bad Request",
-				Error:      "X-Device-Category is required, please provide either 'Web', 'Mobile', 'Desktop App', 'Smart Devices', 'Game Consoles', 'Bots and Automation', 'Virtual or Cloud', or 'Others'",
+				Error:      "X-Device-Category is required",
+			})
+		} else if !helper.IsValidDeviceCategory(deviceCategory) {
+			return helper.SendResponse(helper.ResponseStruct{
+				Ctx:        c,
+				StatusCode: fiber.StatusBadRequest,
+				Message:    "Bad Request",
+				Error:      "X-Device-Category is not a valid",
 			})
 		}
 
-		// TODO: How to check a valid X-Device-Type?
 		deviceType := c.Get("X-Device-Type")
 		if len(deviceType) == 0 {
 			return helper.SendResponse(helper.ResponseStruct{
@@ -67,6 +71,13 @@ func ActivityMiddleware(repository repository.SessionRepository) fiber.Handler {
 				StatusCode: fiber.StatusBadRequest,
 				Message:    "Bad Request",
 				Error:      "X-Device-Type is required",
+			})
+		} else if !helper.IsValidDeviceType(deviceType) {
+			return helper.SendResponse(helper.ResponseStruct{
+				Ctx:        c,
+				StatusCode: fiber.StatusBadRequest,
+				Message:    "Bad Request",
+				Error:      "X-Device-Type is not a valid",
 			})
 		}
 
