@@ -109,14 +109,21 @@ func SetupRoutes(app *fiber.App) {
 	userProfileRepository := repository.NewUserProfileRepository(mongo)
 	userRepository := repository.NewUserRepository(postgres, minio)
 	userSettingRepository := repository.NewUserSettingRepository(mongo)
+	permissionRepository := repository.NewPermissionRepository(postgres)
+	roleRepository := repository.NewRoleRepository(postgres)
 
 	// Service
 	sessionService := service.NewSessionService(sessionRepository)
 	userService := service.NewUserService(userRepository, userProfileRepository, userSettingRepository, roleUserRepository)
 	authService := service.NewAuthService(userService, sessionService)
+	permissionService := service.NewPermissionService(permissionRepository)
+	roleService := service.NewRoleService(roleRepository) // TODO: Check
 
 	// Controller
 	authController := controller.NewAuthController(authService, sessionService, validator)
+	persmissionController := controller.NewPermissionController(permissionService, validator)
+	roleController := controller.NewRoleController(roleService, validator) // TODO: Check
+	userController := controller.NewUserController(userService, validator)
 
 	// More Middleware
 	app.Use(middleware.ActivityMiddleware(sessionRepository))
@@ -146,6 +153,30 @@ func SetupRoutes(app *fiber.App) {
 	//private.Patch("/users/:id/account-activation", userController.AccountActivation)???
 	//private.Get("/verify-email/{id}/{hash}", authController.VerifyEmail)???
 	private.Post("/logout", authController.Logout)
+
+	// Permission
+	private.Get("/permissions", middleware.PermissionAuthMiddleware([]string{"read:permissions"}), persmissionController.GetAll)
+	private.Post("/permissions", middleware.PermissionAuthMiddleware([]string{"write:permissions"}), persmissionController.Create)
+	private.Get("/permissions/:id", middleware.PermissionAuthMiddleware([]string{"read:permissions"}), persmissionController.Get)
+	private.Put("/permissions/:id", middleware.PermissionAuthMiddleware([]string{"write:permissions"}), persmissionController.Update)
+	private.Delete("/permissions/:id", middleware.PermissionAuthMiddleware([]string{"delete:permissions"}), persmissionController.Delete)
+	private.Delete("/permissions/:id/permanent", middleware.PermissionAuthMiddleware([]string{"delete:permissions"}), persmissionController.DeletePermanent)
+
+	// Role
+	private.Get("/roles", middleware.PermissionAuthMiddleware([]string{"read:roles"}), roleController.GetAll)
+	private.Post("/roles", middleware.PermissionAuthMiddleware([]string{"write:roles"}), roleController.Create)
+	private.Get("/roles/:id", middleware.PermissionAuthMiddleware([]string{"read:roles"}), roleController.Get)
+	private.Put("/roles/:id", middleware.PermissionAuthMiddleware([]string{"write:roles"}), roleController.Update)
+	private.Delete("/roles/:id", middleware.PermissionAuthMiddleware([]string{"delete:roles"}), roleController.Delete)
+	private.Delete("/roles/:id/permanent", middleware.PermissionAuthMiddleware([]string{"delete:roles"}), roleController.DeletePermanent)
+
+	// User
+	private.Get("/users", middleware.PermissionAuthMiddleware([]string{"read:users"}), userController.GetAll)
+	private.Post("/users", middleware.PermissionAuthMiddleware([]string{"write:users"}), userController.Create)
+	private.Get("/users/:id", middleware.PermissionAuthMiddleware([]string{"read:users"}), userController.Get)
+	private.Put("/users/:id", middleware.PermissionAuthMiddleware([]string{"write:users"}), userController.Update)
+	private.Delete("/users/:id", middleware.PermissionAuthMiddleware([]string{"delete:users"}), userController.Delete)
+	private.Delete("/users/:id/permanent", middleware.PermissionAuthMiddleware([]string{"delete:users"}), userController.DeletePermanent)
 	// End::Private Routes
 
 	// Not Found

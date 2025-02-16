@@ -42,6 +42,7 @@ func AuthMiddleware() fiber.Handler {
 
 func PermissionAuthMiddleware(permissions []string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
+		// TODO: If the configuration is using team-based permission, also check the team permission
 		tokenPermission := c.Locals("user").(map[string]interface{})["permissions"].([]interface{})
 		for _, v := range permissions {
 			if !helper.ArrayInterfaceContains(tokenPermission, v) {
@@ -59,6 +60,7 @@ func PermissionAuthMiddleware(permissions []string) fiber.Handler {
 
 func RoleAuthMiddleware(roles []string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
+		// TODO: If the configuration is using team-based role, also check the team role
 		tokenRole := c.Locals("user").(map[string]interface{})["roles"].([]interface{})
 		for _, v := range roles {
 			if !helper.ArrayInterfaceContains(tokenRole, v) {

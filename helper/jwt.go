@@ -100,12 +100,8 @@ func ValidateRS512Token(publicKey, token string, isCheckingExpiration bool) (*jw
 	})
 
 	if err != nil {
-		if isCheckingExpiration {
-			if errors.Is(err, jwt.ErrTokenExpired) {
-				return nil, err
-			}
-		} else {
-			return nil, nil
+		if errors.Is(err, jwt.ErrTokenExpired) && !isCheckingExpiration {
+			return parsedToken, nil
 		}
 
 		return nil, err
