@@ -59,7 +59,7 @@ func SetupRoutes(app *fiber.App) {
 			return false
 		},
 		AllowMethods: "GET, POST, PATCH, PUT, DELETE",
-		AllowHeaders: "Content-Type, Content-Length, Host, User-Agent, Accept, Accept-Encoding, Connection, Authorization, Accept-Language",
+		AllowHeaders: "Content-Type, Content-Length, Host, User-Agent, Accept, Accept-Encoding, Connection, Authorization, Accept-Language, X-App-Id, X-Device-Category, X-Device-Type, Referer",
 		// TODO: Limit ExposeHeaders to only the necessary headers
 		//ExposeHeaders: "",
 	}))
