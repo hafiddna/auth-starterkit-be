@@ -49,7 +49,9 @@ func (s *userService) Profile(id string) (data dto.UserProfileDTO, err error) {
 
 	data = dto.UserProfileDTO{
 		Username:        user.Username.String,
+		Email:           user.Email.String,
 		EmailVerifiedAt: user.EmailVerifiedAt.Int64,
+		Phone:           user.Phone.String,
 		PhoneVerifiedAt: user.PhoneVerifiedAt.Int64,
 		FullName:        *profile.FullName,
 		NickName:        *profile.NickName,
