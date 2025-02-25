@@ -47,7 +47,7 @@ func (r *userRepository) FindByEmailPhoneOrUsername(credential string) (user mod
 }
 
 func (r *userRepository) FindOneById(id string) (user model.User, err error) {
-	query := r.db.Where("id = ?", id)
+	query := r.db.Where("id = ?", id).Preload("Roles", "team_id IS NULL")
 
 	if config.Config.App.AuthConfig.IsTeamEnabled {
 		query = query.Preload("Teams").Preload("MembersOf")

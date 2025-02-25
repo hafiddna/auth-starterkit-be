@@ -12,5 +12,6 @@ type UserProfileDTO struct {
 	FullName        string               `json:"full_name"`
 	NickName        string               `json:"nick_name"`
 	Avatar          string               `json:"avatar"`
+	Role            string               `json:"role"`
 	Teams           []TeamUserProfileDTO `json:"teams,omitempty"`
 }
